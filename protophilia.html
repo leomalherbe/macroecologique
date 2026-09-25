@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Machine Philia</title>
+<meta name="description" content="Toy model hydraulique inspiré du modèle SFC écologique Philia 1.0 : circuit monnaie-crédit simplifié et rétroactions climatiques sur 60 ans.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#e7ecf0; --panel:#ffffff; --panel-2:#f3f6f9; --sunk:#e5ebef;
+  --ink:#14232f; --muted:#5c6e7a; --faint:#8598a3; --line:#d6dee4;
+  --water:#1786c4; --water-2:#63bced; --pipe:#a7bbc6;
+  --brass:#a2771f; --leak:#c65a2b; --inject:#0e7c6e; --bio:#2c9350; --emit:#a23b2c; --heat:#d0392b;
+  --accent:#1786c4; --good:#159f6f; --warn:#c98a12; --bad:#cf3b2c;
+  --glass:rgba(120,175,210,.10);
+  --shadow:0 1px 2px rgba(20,40,55,.06),0 8px 24px rgba(20,40,55,.07);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0a1317; --panel:#0f1e26; --panel-2:#0c1a22; --sunk:#0a161d;
+  --ink:#e6eff3; --muted:#8aa0ac; --faint:#65808d; --line:#1f343e;
+  --water:#37a9e2; --water-2:#7ad3ff; --pipe:#385563;
+  --brass:#d3a24e; --leak:#f0894f; --inject:#37c6b2; --bio:#59cc7b; --emit:#e5714f; --heat:#ff6f5d;
+  --accent:#37a9e2; --good:#3fc794; --warn:#e5ad3a; --bad:#ff6f5d;
+  --glass:rgba(60,150,200,.10);
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"]{
+  --bg:#0a1317; --panel:#0f1e26; --panel-2:#0c1a22; --sunk:#0a161d;
+  --ink:#e6eff3; --muted:#8aa0ac; --faint:#65808d; --line:#1f343e;
+  --water:#37a9e2; --water-2:#7ad3ff; --pipe:#385563;
+  --brass:#d3a24e; --leak:#f0894f; --inject:#37c6b2; --bio:#59cc7b; --emit:#e5714f; --heat:#ff6f5d;
+  --accent:#37a9e2; --good:#3fc794; --warn:#e5ad3a; --bad:#ff6f5d;
+  --glass:rgba(60,150,200,.10);
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding-block:22px 40px;padding-left:16px;padding-right:16px}
+
+.masthead{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 20px;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:16px}
+.brand{display:flex;flex-direction:column;gap:3px;min-width:0}
+.eyebrow{font:500 11px/1 "IBM Plex Mono",monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--brass)}
+h1{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:clamp(25px,4.4vw,38px);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);font-size:14px;max-width:60ch}
+.sub em{font-style:normal;color:var(--faint)}
+.theme-btn{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:9px;padding:8px 11px;font:inherit;font-size:13px;cursor:pointer}
+.theme-btn:hover{color:var(--ink);border-color:var(--pipe)}
+
+/* sim bar */
+.simbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:16px;background:var(--panel);border:1px solid var(--line);
+  border-radius:14px;padding:11px 14px;box-shadow:var(--shadow)}
+.btn{appearance:none;border:1px solid var(--line);background:var(--panel-2);color:var(--ink);border-radius:10px;
+  padding:9px 15px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.06)}
+.clock{display:flex;align-items:baseline;gap:8px;margin-left:2px}
+.clock .yr{font-family:"IBM Plex Mono",monospace;font-size:26px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.clock .u{font-size:12px;color:var(--faint)}
+.progress{flex:1;min-width:120px;height:7px;background:var(--sunk);border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.progress .p{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--water-2));transition:width .08s linear}
+.spd{display:inline-flex;gap:2px;background:var(--sunk);border:1px solid var(--line);border-radius:9px;padding:3px}
+.spd button{appearance:none;border:0;background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:600;
+  padding:4px 9px;border-radius:7px;cursor:pointer}
+.spd button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+
+.stage{display:grid;grid-template-columns:1.22fr .98fr;gap:18px;margin-top:16px;align-items:start}
+@media (max-width:880px){.stage{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.card-pad{padding:16px 18px}
+.machine-card{overflow:hidden}
+#machine{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;padding:11px 18px 13px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:11px;height:11px;border-radius:3px;flex:none}
+
+/* svg */
+.tank{fill:none;stroke:var(--pipe);stroke-width:1.4}
+.glassband{fill:var(--glass);pointer-events:none}
+.casing{fill:none;stroke:var(--pipe);stroke-width:14;stroke-linecap:round;opacity:.42}
+.flow{fill:none;stroke:var(--water);stroke-width:9;stroke-linecap:round;stroke-dasharray:8 12;
+  animation:flow var(--spd,2s) linear infinite;transition:opacity .3s,stroke-width .3s}
+.flow.rev{animation-direction:reverse}
+.flow.ext{stroke:var(--bio)} .flow.emit{stroke:var(--emit)} .flow.dmg{stroke:var(--heat);stroke-dasharray:3 8}
+@keyframes flow{to{stroke-dashoffset:-20}}
+.svg-title{font-family:"Fraunces",serif;font-weight:600;fill:var(--ink)}
+.svg-sub{font-family:"IBM Plex Mono",monospace;fill:var(--faint)}
+.svg-role{font-family:"IBM Plex Mono",monospace;letter-spacing:.03em;fill:var(--muted)}
+.svg-val{font-family:"IBM Plex Mono",monospace;fill:var(--ink);font-weight:500}
+@media (prefers-reduced-motion:reduce){.flow{animation:none!important;stroke-dasharray:none;opacity:.85!important}}
+
+/* readouts */
+.readouts{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:6px}
+.stat{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;position:relative}
+.stat .k{font-size:11px;color:var(--muted);font-weight:600;display:flex;justify-content:space-between;gap:6px}
+.stat .k em{font-style:normal;color:var(--faint);font-weight:400}
+.stat .v{font-family:"IBM Plex Mono",monospace;font-size:22px;font-weight:500;margin-top:2px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat .v small{font-size:11px;color:var(--muted);font-weight:400}
+.stat.hot .v{color:var(--heat)} .stat.warn .v{color:var(--warn)} .stat.good .v{color:var(--good)}
+.subrow{display:flex;flex-wrap:wrap;gap:8px 16px;margin:12px 2px 4px;font-size:12px;color:var(--muted)}
+.subrow b{font-family:"IBM Plex Mono",monospace;color:var(--ink);font-weight:500}
+.sfc{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:7px;margin:10px 2px 2px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;border:1px solid currentColor}
+.pill.ok{color:var(--good)} .pill.warn{color:var(--warn)} .pill.bad{color:var(--bad)}
+.pill .d{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+
+.presets{display:flex;flex-wrap:wrap;gap:7px;margin:16px 0 6px}
+.chip{appearance:none;border:1px solid var(--line);background:var(--panel-2);color:var(--ink);border-radius:20px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip small{font-weight:400;color:var(--faint)}
+
+.group-h{font:500 10px/1 "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--brass);margin:16px 0 2px}
+.ctrl{padding:10px 0;border-top:1px solid var(--line)}
+.ctrl-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:7px}
+.ctrl-h .name{font-size:13.5px;font-weight:600}
+.ctrl-h .name em{display:block;font-weight:400;font-size:11px;color:var(--faint);font-style:normal}
+.ctrl-h .val{font-family:"IBM Plex Mono",monospace;font-size:15px;font-weight:500;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;background:var(--sunk);outline:none;cursor:pointer;margin:2px 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--panel);border:2px solid var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:pointer;transition:.1s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.12)}
+input[type=range].eco::-webkit-slider-thumb{border-color:var(--bio)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--panel);border:2px solid var(--accent);cursor:pointer}
+.ctrl .note{font-size:11px;color:var(--faint);margin-top:5px}
+
+/* charts */
+.charts{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+@media (max-width:880px){.charts{grid-template-columns:1fr 1fr}}
+@media (max-width:460px){.charts{grid-template-columns:1fr}}
+.chart{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 13px 10px;box-shadow:var(--shadow)}
+.chart .ch-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px}
+.chart .ch-t{font-size:12px;font-weight:600}
+.chart .ch-t em{display:block;font-weight:400;font-size:10px;color:var(--faint);font-style:normal}
+.chart .ch-v{font-family:"IBM Plex Mono",monospace;font-size:15px;font-weight:500;font-variant-numeric:tabular-nums}
+.chart canvas{width:100%;height:78px;display:block}
+
+.bs{margin-top:18px}
+.bs-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.bs-h h2{font-family:"Fraunces",serif;font-weight:600;font-size:17px;margin:0}
+.bs-h h2 em{font-style:normal;font-weight:400;font-size:12px;color:var(--faint)}
+.bs-note{font-size:12px;color:var(--muted);margin:8px 0 10px;max-width:84ch}
+.bs-note .pos{color:var(--water);font-weight:600} .bs-note .neg{color:var(--emit);font-weight:600}
+.bs-note strong{color:var(--ink);font-weight:600}
+.bs-scroll{overflow-x:auto}
+#bs-table{width:100%;border-collapse:collapse;font-size:12.5px;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;min-width:520px}
+#bs-table th,#bs-table td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+#bs-table th:first-child,#bs-table td:first-child{text-align:left;font-family:"Public Sans",sans-serif;font-weight:600;color:var(--muted)}
+#bs-table thead th{color:var(--ink);font-family:"Public Sans",sans-serif;font-weight:600;font-size:12px;border-bottom:1.5px solid var(--pipe)}
+#bs-table tr.net td{border-top:1.5px solid var(--pipe);border-bottom:0;font-weight:600;color:var(--ink)}
+#bs-table tr.net td:first-child{color:var(--ink)}
+#bs-table .pos{color:var(--water)} #bs-table .neg{color:var(--emit)} #bs-table .zero{color:var(--faint)}
+#bs-table .sig{color:var(--good);font-weight:600}
+#bs-table td.sigcol,#bs-table th.sigcol{border-left:1px solid var(--line)}
+
+.notes{margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:880px){.notes{grid-template-columns:1fr}}
+.note-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 17px;box-shadow:var(--shadow)}
+.note-card h3{font-family:"Fraunces",serif;font-size:15px;margin:0 0 6px;display:flex;align-items:center;gap:8px}
+.note-card h3 .tg{font:500 9px/1 "IBM Plex Mono",monospace;letter-spacing:.1em;padding:3px 6px;border-radius:5px}
+.tg.k{color:var(--water);border:1px solid var(--water)} .tg.e{color:var(--bio);border:1px solid var(--bio)}
+.note-card p{font-size:13px;color:var(--muted);margin:0 0 8px}.note-card p:last-child{margin-bottom:0}
+.note-card strong{color:var(--ink);font-weight:600}
+.foot{margin-top:22px;font-size:11.5px;color:var(--faint);border-top:1px solid var(--line);padding-top:14px;max-width:82ch}
+.foot b{color:var(--muted);font-weight:600} .foot a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="brand">
+      <div class="eyebrow">Toy model · d'après Philia 1.0 (SFC écologique)</div>
+      <h1>La machine Philia</h1>
+      <p class="sub">Une machine hydraulique à la MONIAC, mais <strong>stock-flux cohérente</strong> et <strong>dynamique</strong> : la monnaie est créée par le crédit bancaire, l'économie démarre à l'état stationnaire, puis les <strong>rétroactions climatiques</strong> se déploient sur 60 ans. <em>Press play and watch the climate feed back on the economy.</em></p>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button">◐ Thème</button>
+  </header>
+
+  <div class="simbar">
+    <button class="btn primary" id="playBtn" type="button">▶ Lancer</button>
+    <button class="btn" id="resetBtn" type="button">↺ Reset</button>
+    <div class="clock"><span class="yr" id="yr">0</span><span class="u">/ 60 ans</span></div>
+    <div class="progress"><div class="p" id="prog"></div></div>
+    <div class="spd" id="spd" role="group" aria-label="Vitesse">
+      <button type="button" data-s="0.5">0.5×</button>
+      <button type="button" data-s="1" aria-pressed="true">1×</button>
+      <button type="button" data-s="2">2×</button>
+      <button type="button" data-s="4">4×</button>
+    </div>
+  </div>
+
+  <div class="stage">
+    <!-- MACHINE -->
+    <section class="card machine-card" aria-label="Circuit hydraulique">
+      <svg id="machine" viewBox="0 0 600 690" role="img" aria-label="Circuit monnaie-crédit et flux écologiques">
+        <defs>
+          <linearGradient id="gw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--water-2)"/><stop offset="1" stop-color="var(--water)"/></linearGradient>
+          <linearGradient id="gbio" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--bio)"/><stop offset="1" stop-color="#1f6e3c"/></linearGradient>
+          <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="var(--emit)"/></marker>
+          <marker id="arrowG" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="var(--bio)"/></marker>
+          <marker id="arrowH" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="var(--heat)"/></marker>
+          <marker id="arrowB" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="var(--water)"/></marker>
+          <clipPath id="c-bc"><rect x="406" y="24" width="170" height="80" rx="9"/></clipPath>
+          <clipPath id="c-res"><rect x="24" y="24" width="170" height="84" rx="9"/></clipPath>
+          <clipPath id="c-mh"><rect x="24" y="250" width="150" height="96" rx="9"/></clipPath>
+          <clipPath id="c-ff"><rect x="222" y="150" width="176" height="126" rx="10"/></clipPath>
+          <clipPath id="c-bk"><rect x="430" y="196" width="146" height="104" rx="9"/></clipPath>
+          <clipPath id="c-et"><rect x="222" y="330" width="176" height="96" rx="9"/></clipPath>
+          <clipPath id="c-atm"><rect x="24" y="560" width="500" height="104" rx="10"/></clipPath>
+        </defs>
+
+        <!-- pipes (drawn under tanks) -->
+        <!-- extraction eco -> firmes -->
+        <path class="casing" d="M109,108 V132 H250 V150"/>
+        <path id="f-ext" class="flow ext" d="M109,108 V132 H250 V150" marker-end="url(#arrowG)" style="stroke:var(--bio)"/>
+        <!-- wages firmes -> menages -->
+        <path class="casing" d="M222,198 H99 V250"/><path id="f-wage" class="flow" d="M222,198 H99 V250" marker-end="url(#arrowB)"/>
+        <text class="svg-role" x="150" y="192" font-size="8.5" fill="var(--muted)" text-anchor="middle">salaires</text>
+        <text class="svg-role" x="212" y="316" font-size="8.5" fill="var(--muted)" text-anchor="middle">conso.</text>
+        <!-- consumption menages -> firmes -->
+        <path class="casing" d="M174,300 H250 V276"/><path id="f-cons" class="flow" d="M174,300 H250 V276" marker-end="url(#arrowB)"/>
+        <!-- credit banque -> firmes -->
+        <path class="casing" d="M430,250 H398"/><path id="f-credit" class="flow" d="M430,250 H398" marker-end="url(#arrowB)"/>
+        <!-- gov financing banque -> etat -->
+        <path class="casing" d="M478,300 V372 H398" style="opacity:.3"/><path id="f-govfin" class="flow" d="M478,300 V372 H398" style="stroke-width:6"/>
+        <!-- taxes firmes -> etat -->
+        <path class="casing" d="M300,276 V330"/><path id="f-tax" class="flow" d="M300,276 V330" marker-end="url(#arrowB)"/>
+        <!-- taxes menages -> etat -->
+        <path class="casing" d="M140,346 V406 H222"/><path id="f-taxh" class="flow" d="M140,346 V406 H222" marker-end="url(#arrowB)"/>
+        <text class="svg-role" x="146" y="392" font-size="8.5" fill="var(--muted)">impôts</text>
+        <!-- spending etat -> economy -->
+        <path class="casing" d="M330,330 V276"/><path id="f-spend" class="flow" d="M330,330 V276" marker-end="url(#arrowB)"/>
+        <!-- emissions firmes -> atmosphere -->
+        <path class="casing" d="M362,276 H420 V560"/>
+        <path id="f-emit" class="flow emit" d="M362,276 H420 V560" marker-end="url(#arrow)"/>
+        <!-- damage feedback atmosphere -> economy -->
+        <path id="f-dmg" class="flow dmg" d="M60,560 V330" marker-end="url(#arrowH)"/>
+        <text class="svg-role" x="46" y="452" font-size="9" fill="var(--heat)" transform="rotate(-90 46 452)">dommage climatique →</text>
+
+        <!-- ECOSYSTEME -->
+        <rect id="w-res" x="24" y="108" width="170" height="0" fill="url(#gbio)" clip-path="url(#c-res)"/>
+        <rect class="tank" x="24" y="24" width="170" height="84" rx="9" fill="none"/><rect class="glassband" x="24" y="24" width="170" height="84" rx="9"/>
+        <text class="svg-title" x="109" y="52" font-size="13" text-anchor="middle">Écosystème</text>
+        <text class="svg-sub" x="109" y="66" font-size="8.5" text-anchor="middle">RÉSERVES · matière-énergie</text>
+        <text id="v-res" class="svg-val" x="109" y="94" font-size="13" text-anchor="middle">100</text>
+
+        <!-- MENAGES -->
+        <rect id="w-mh" x="24" y="346" width="150" height="0" fill="url(#gw)" clip-path="url(#c-mh)"/>
+        <rect class="tank" x="24" y="250" width="150" height="96" rx="9" fill="none"/><rect class="glassband" x="24" y="250" width="150" height="96" rx="9"/>
+        <text class="svg-title" x="99" y="284" font-size="14" text-anchor="middle">Ménages</text>
+        <text class="svg-sub" x="99" y="299" font-size="8.5" text-anchor="middle">HOUSEHOLDS · dépôts</text>
+        <text id="v-mh" class="svg-val" x="99" y="330" font-size="12" text-anchor="middle" fill="var(--muted)"></text>
+
+        <!-- FIRMES -->
+        <rect id="w-ff" x="222" y="276" width="176" height="0" fill="url(#gw)" clip-path="url(#c-ff)"/>
+        <rect class="tank" x="222" y="150" width="176" height="126" rx="10" fill="none"/><rect class="glassband" x="222" y="150" width="176" height="126" rx="10"/>
+        <text class="svg-title" x="310" y="184" font-size="15" text-anchor="middle">Firmes</text>
+        <text class="svg-sub" x="310" y="198" font-size="8.5" text-anchor="middle">FIRMS · dépôts</text>
+        <text id="v-ffY" class="svg-role" x="310" y="222" font-size="11" text-anchor="middle" fill="var(--brass)">▸ production Y = 100 /an</text>
+        <text id="v-ff" class="svg-val" x="310" y="252" font-size="15" text-anchor="middle">dépôts 40</text>
+
+        <!-- reserves banque centrale -> banque -->
+        <path class="casing" d="M491,104 V172 H503 V196"/>
+        <path id="f-bcres" class="flow" d="M491,104 V172 H503 V196" marker-end="url(#arrowB)"/>
+        <text class="svg-role" x="512" y="150" font-size="8.5" fill="var(--muted)">réserves</text>
+
+        <!-- BANQUE CENTRALE -->
+        <rect id="w-bc" x="406" y="104" width="170" height="0" fill="url(#gw)" clip-path="url(#c-bc)"/>
+        <rect class="tank" x="406" y="24" width="170" height="80" rx="9" fill="none"/><rect class="glassband" x="406" y="24" width="170" height="80" rx="9"/>
+        <text class="svg-title" x="491" y="52" font-size="13" text-anchor="middle">Banque centrale</text>
+        <text class="svg-sub" x="491" y="66" font-size="8" text-anchor="middle">CENTRAL BANK · réserves</text>
+        <text id="v-bc" class="svg-val" x="491" y="92" font-size="12" text-anchor="middle" fill="var(--muted)"></text>
+
+        <!-- BANQUE -->
+        <rect id="w-bk" x="430" y="300" width="146" height="0" fill="url(#gw)" clip-path="url(#c-bk)"/>
+        <rect class="tank" x="430" y="196" width="146" height="104" rx="9" fill="none"/><rect class="glassband" x="430" y="196" width="146" height="104" rx="9"/>
+        <text class="svg-title" x="503" y="228" font-size="13" text-anchor="middle">Banque</text>
+        <text class="svg-sub" x="503" y="242" font-size="8" text-anchor="middle">crédit → création monétaire</text>
+        <text id="v-bk" class="svg-val" x="503" y="272" font-size="12" text-anchor="middle" fill="var(--muted)"></text>
+
+        <!-- ETAT -->
+        <rect id="w-et" x="222" y="426" width="176" height="0" fill="url(#gw)" clip-path="url(#c-et)"/>
+        <rect class="tank" x="222" y="330" width="176" height="96" rx="9" fill="none"/><rect class="glassband" x="222" y="330" width="176" height="96" rx="9"/>
+        <text class="svg-title" x="310" y="364" font-size="14" text-anchor="middle">État</text>
+        <text class="svg-sub" x="310" y="379" font-size="8.5" text-anchor="middle">GOVERNMENT · dette</text>
+        <text id="v-et" class="svg-val" x="310" y="410" font-size="12" text-anchor="middle" fill="var(--muted)"></text>
+
+        <!-- ATMOSPHERE -->
+        <rect id="w-atm" x="24" y="664" width="500" height="0" fill="var(--emit)" opacity="0.5" clip-path="url(#c-atm)"/>
+        <rect class="tank" x="24" y="560" width="500" height="104" rx="10" fill="none"/>
+        <text class="svg-title" x="44" y="588" font-size="13">Atmosphère</text>
+        <text class="svg-sub" x="44" y="602" font-size="8.5">CO₂ cumulé &amp; température</text>
+        <text class="svg-role" x="44" y="638" font-size="10">Émissions cumulées <tspan id="v-cume" class="svg-val" font-size="11">0</tspan></text>
+        <text class="svg-role" x="44" y="652" font-size="10">Inflation d'offre <tspan id="v-pi" class="svg-val" font-size="11">2.0 %</tspan></text>
+        <!-- thermometer -->
+        <rect x="544" y="560" width="32" height="104" rx="8" fill="var(--panel-2)" stroke="var(--pipe)" stroke-width="1.2"/>
+        <clipPath id="c-th"><rect x="552" y="572" width="16" height="80" rx="8"/></clipPath>
+        <rect x="552" y="572" width="16" height="80" rx="8" fill="var(--sunk)"/>
+        <rect id="w-th" x="552" y="652" width="16" height="0" fill="var(--heat)" clip-path="url(#c-th)"/>
+        <text id="v-temp" class="svg-val" x="560" y="556" font-size="12" text-anchor="middle" fill="var(--heat)">+0.0°</text>
+
+        <!-- étiquettes des flux (au-dessus) -->
+        <text class="svg-role" x="180" y="126" font-size="8.5" fill="var(--bio)" text-anchor="middle">extraction</text>
+        <text class="svg-role" x="414" y="242" font-size="8.5" fill="var(--muted)" text-anchor="middle">crédit</text>
+        <text class="svg-role" x="294" y="306" font-size="8.5" fill="var(--muted)" text-anchor="end">impôts</text>
+        <text class="svg-role" x="337" y="306" font-size="8.5" fill="var(--muted)" text-anchor="start">dépenses</text>
+        <text class="svg-role" x="436" y="366" font-size="8" fill="var(--muted)" text-anchor="start">fin. État</text>
+        <text class="svg-role" x="430" y="430" font-size="9" fill="var(--emit)" text-anchor="start">émissions</text>
+      </svg>
+
+      <div class="legend">
+        <span><i class="dot" style="background:var(--water)"></i> Monnaie · crédit &amp; dépenses</span>
+        <span><i class="dot" style="background:var(--bio)"></i> Extraction · ressources</span>
+        <span><i class="dot" style="background:var(--emit)"></i> Émissions</span>
+        <span><i class="dot" style="background:var(--heat)"></i> Rétroaction climatique</span>
+      </div>
+    </section>
+
+    <!-- CONTROLS -->
+    <section class="card card-pad" aria-label="Indicateurs et leviers">
+      <div class="readouts">
+        <div class="stat" id="st-Y"><div class="k"><span>PIB réel</span><em>output Y</em></div><div class="v" id="r-Y">100</div></div>
+        <div class="stat" id="st-T"><div class="k"><span>Réchauffement</span><em>ΔT</em></div><div class="v" id="r-T">+0.0 <small>°C</small></div></div>
+        <div class="stat" id="st-D"><div class="k"><span>Dommage climat</span><em>output loss</em></div><div class="v" id="r-D">0 <small>%</small></div></div>
+        <div class="stat" id="st-P"><div class="k"><span>Inflation</span><em>supply-side</em></div><div class="v" id="r-P">2.0 <small>%</small></div></div>
+      </div>
+      <div class="subrow">
+        <span>Émissions/an <b id="r-E">0</b></span>
+        <span>Réserves <b id="r-R">100</b></span>
+        <span>Intensité carbone <b id="r-ci">0.50</b></span>
+      </div>
+      <div class="sfc">
+        <span class="pill ok" id="sfc-pill"><i class="d"></i><span>SFC</span></span>
+        <span>monnaie (dépôts) = crédit + dette publique · résidu <b id="r-sfc" style="font-family:'IBM Plex Mono',monospace">0.00</b></span>
+      </div>
+
+      <div class="presets" id="presets"></div>
+      <div id="controls"></div>
+    </section>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts">
+    <div class="chart"><div class="ch-h"><div class="ch-t">PIB réel<em>output</em></div><div class="ch-v" id="cv-Y">100</div></div><canvas id="ch-Y"></canvas></div>
+    <div class="chart"><div class="ch-h"><div class="ch-t">Température<em>ΔT vs +1.5 / +2°C</em></div><div class="ch-v" id="cv-T" style="color:var(--heat)">+0.0°</div></div><canvas id="ch-T"></canvas></div>
+    <div class="chart"><div class="ch-h"><div class="ch-t">Émissions<em>par an</em></div><div class="ch-v" id="cv-E">0</div></div><canvas id="ch-E"></canvas></div>
+    <div class="chart"><div class="ch-h"><div class="ch-t">Réserves<em>matière-énergie</em></div><div class="ch-v" id="cv-R">100</div></div><canvas id="ch-R"></canvas></div>
+  </div>
+
+  <!-- BALANCE SHEETS -->
+  <section class="card card-pad bs" aria-label="Matrice des bilans">
+    <div class="bs-h">
+      <h2>Matrice des bilans <em>balance-sheet matrix</em></h2>
+      <span class="pill ok" id="bs-pill"><i class="d"></i><span>équilibré</span></span>
+    </div>
+    <p class="bs-note">Actif noté <span class="pos">+</span>, passif noté <span class="neg">−</span>. Chaque <strong>ligne</strong> (un actif est le passif d'un autre) et chaque <strong>colonne Σ</strong> se somment à zéro : c'est la cohérence stock-flux. La monnaie (dépôts) est détenue à la fois par les ménages et les firmes.</p>
+    <div class="bs-scroll"><table id="bs-table"></table></div>
+    <p class="bs-note" id="bs-memo"></p>
+  </section>
+
+  <div class="notes">
+    <div class="note-card">
+      <h3><span class="tg k">SFC</span> Monnaie endogène &amp; cohérence stock-flux</h3>
+      <p>Ici la monnaie n'est pas versée d'en haut : la <strong>banque</strong> la crée en accordant du crédit aux firmes, et l'<strong>État</strong> qui dépense plus qu'il ne prélève injecte lui aussi de la monnaie. Toute la circulation reste <strong>watertight</strong> : ce qui sort d'un secteur entre dans un autre.</p>
+      <p>L'identité comptable <strong>dépôts = crédit + dette publique</strong> est vérifiée à chaque instant (résidu ≈ 0) — c'est la signature d'un modèle stock-flux cohérent, comme Philia.</p>
+    </div>
+    <div class="note-card">
+      <h3><span class="tg e">CLIMAT</span> Les rétroactions</h3>
+      <p>La production extrait des <strong>ressources</strong> et rejette des <strong>émissions</strong>. Celles-ci s'accumulent dans l'atmosphère → la <strong>température</strong> monte (proportionnelle aux émissions cumulées).</p>
+      <p>Trois retours frappent alors l'économie : une <strong>fonction de dommage</strong> (la chaleur ampute le PIB), une <strong>inflation d'offre</strong> (rareté &amp; climat, à la Philia), et une <strong>demande</strong> plus frileuse. En <em>business-as-usual</em>, même une économie stationnaire se réchauffe et s'appauvrit — sauf si vous décarbonez (effort vert, taxe carbone, technologie propre).</p>
+    </div>
+  </div>
+
+  <p class="foot"><b>Toy model pédagogique</b> librement inspiré de <b>Philia 1.0</b> (modèle macroéconomique <i>stock-flow consistent</i> écologique, licence CC-BY-4.0) — <a href="https://github.com/Philia-ecs/Philia1.0" target="_blank" rel="noopener">github.com/Philia-ecs/Philia1.0</a>. Ce n'est <b>pas</b> Philia : le vrai modèle compte ~500 équations, 7 secteurs et un cycle du carbone détaillé ; on n'en garde ici qu'un ménage, une firme, une banque créatrice de monnaie, un actif (dépôts), l'État et l'écosystème, avec une fonction de dommage réduite. Grandeurs sans unité, PIB de départ = 100. Calibré pour enseigner les mécanismes, pas pour prévoir.</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+
+  /* theme */
+  (function(){var root=document.documentElement,s=null;try{s=localStorage.getItem("philia-theme");}catch(e){}
+    if(s)root.setAttribute("data-theme",s);
+    $("themeBtn").addEventListener("click",function(){var cur=root.getAttribute("data-theme");
+      var m=window.matchMedia&&window.matchMedia("(prefers-color-scheme:dark)").matches;
+      var n=cur?(cur==="dark"?"light":"dark"):(m?"light":"dark");root.setAttribute("data-theme",n);
+      try{localStorage.setItem("philia-theme",n);}catch(e){}});})();
+
+  /* ---------- model (validated) ---------- */
+  var C={a0:3,delta:0.05,s_tcre:0.001,d1:0.0233,d2:0.02,kext:0.01,rho:0.06,psi:0.02,phiT:0.9,phiS:4.0};
+  var DEFAULTS={gpub:20,t:20,icb:2,credit:0,c:90,ci0:50,green:0,ctax:0};
+  var P=Object.assign({},DEFAULTS);
+  function abate(x){return x/(x+80);}
+  function damage(T){return 1-1/(1+C.d1*T+C.d2*T*T);}
+
+  function initState(){return{year:0,K:100,Dh:100,Df:40,L:80,Gov:-60,CumE:0,Temp:0,A:0,Res:100,pi:2,Y:100,E:0};}
+
+  function step(st,L,dt){
+    var t=L.t/100, c=L.c/100, ci0=L.ci0/100, green=L.green/100;
+    var T=st.Temp, Om=damage(T), cEff=c*(1-C.psi*T);
+    var greenCapex=3*green;
+    var I=C.delta*st.K + L.credit + greenCapex - 0.4*L.icb;
+    var G=L.gpub;
+    var denom=1 - cEff*(1-t);
+    var Ydem=(C.a0+I+G)/denom;
+    var Y=Math.max(0,Ydem*(1-Om));
+    var E=Math.max(0, ci0*Y*(1-st.A)*(1-abate(L.ctax)));
+    var taxes=t*Y, carbonRev=L.ctax*E/100, deficit=G-taxes-carbonRev;
+    var YD=(1-t)*Y*0.98+0.01*st.Dh, Cc=cEff*YD+C.a0, Sh=YD-Cc;
+    var netInv=I-C.delta*st.K, dL=netInv, dGov=-deficit, dDh=Sh, dDf=(dL+deficit)-Sh;
+    var n=Object.assign({},st);
+    n.year=st.year+dt; n.K=st.K+netInv*dt; n.Dh=st.Dh+dDh*dt; n.Df=st.Df+dDf*dt;
+    n.L=st.L+dL*dt; n.Gov=st.Gov+dGov*dt; n.CumE=st.CumE+E*dt;
+    n.Res=Math.max(0,st.Res-C.kext*Y*dt); n.A=Math.min(1,st.A+C.rho*green*(1-st.A)*dt);
+    n.Temp=C.s_tcre*n.CumE; n.pi=2+C.phiT*n.Temp+C.phiS*(1-n.Res/100)+0.02*L.ctax;
+    n.Y=Y; n.E=E; n.ci=ci0*(1-n.A);
+    n.sfc=(n.Dh+n.Df)-(n.L+(-n.Gov));
+    return n;
+  }
+
+  /* ---------- sliders ---------- */
+  var SL=[
+    {g:"Politique budgétaire & monétaire"},
+    {key:"gpub",fr:"Dépenses publiques",en:"Government spending",min:0,max:40,step:1,fmt:function(v){return v.toFixed(0);}},
+    {key:"t",fr:"Taux d'imposition",en:"Tax rate",min:0,max:40,step:1,fmt:function(v){return v+" %";}},
+    {key:"icb",fr:"Taux directeur",en:"Policy rate",min:0,max:10,step:0.5,fmt:function(v){return v.toFixed(1)+" %";}},
+    {key:"credit",fr:"Impulsion de crédit",en:"Credit impulse",min:0,max:12,step:0.5,fmt:function(v){return "+"+v.toFixed(1);},note:"investissement net financé par création monétaire"},
+    {key:"c",fr:"Propension à consommer",en:"Propensity to consume",min:60,max:95,step:1,fmt:function(v){return (v/100).toFixed(2);}},
+    {g:"Écologie"},
+    {key:"ci0",fr:"Intensité carbone",en:"Carbon intensity (tech)",min:5,max:70,step:1,fmt:function(v){return (v/100).toFixed(2);},eco:1,note:"CO₂ par unité produite (choix technologique)"},
+    {key:"green",fr:"Effort de décarbonation",en:"Green transition effort",min:0,max:100,step:5,fmt:function(v){return v+" %";},eco:1,note:"construit un capital d'abattement — la transition prend des années"},
+    {key:"ctax",fr:"Taxe carbone",en:"Carbon price",min:0,max:150,step:5,fmt:function(v){return v+" €/t";},eco:1,note:"abat les émissions, mais pousse l'inflation d'offre"}
+  ];
+  function buildControls(){
+    var w=$("controls");w.innerHTML="";
+    SL.forEach(function(s){
+      if(s.g){var h=document.createElement("div");h.className="group-h";h.textContent=s.g;w.appendChild(h);return;}
+      var row=document.createElement("div");row.className="ctrl";
+      row.innerHTML='<div class="ctrl-h"><div class="name">'+s.fr+'<em>'+s.en+'</em></div><div class="val" id="val-'+s.key+'"></div></div>'+
+        '<input type="range" class="'+(s.eco?"eco":"")+'" id="sl-'+s.key+'" min="'+s.min+'" max="'+s.max+'" step="'+s.step+'" aria-label="'+s.fr+'">'+
+        (s.note?'<div class="note">'+s.note+'</div>':'');
+      w.appendChild(row);
+      var inp=row.querySelector("input");inp.value=P[s.key];
+      inp.addEventListener("input",function(){P[s.key]=parseFloat(inp.value);$("val-"+s.key).textContent=s.fmt(P[s.key]);});
+    });
+    syncSliders();
+  }
+  function syncSliders(){SL.forEach(function(s){if(s.g)return;var i=$("sl-"+s.key);if(i)i.value=P[s.key];var v=$("val-"+s.key);if(v)v.textContent=s.fmt(P[s.key]);});}
+
+  var PRESETS=[
+    {name:"Business-as-usual",en:"BAU",set:{gpub:20,t:20,icb:2,credit:0,c:90,ci0:50,green:0,ctax:0}},
+    {name:"Transition verte",en:"Green transition",set:{green:80,ctax:100,credit:3,icb:1.5}},
+    {name:"Relance sale",en:"Dirty stimulus",set:{credit:8,gpub:30,ci0:55,green:0,ctax:0}},
+    {name:"Techno propre",en:"Clean tech",set:{ci0:18}},
+    {name:"Taxe carbone seule",en:"Carbon tax only",set:{ctax:120,green:0}}
+  ];
+  function buildPresets(){var w=$("presets");w.innerHTML="";
+    PRESETS.forEach(function(pr){var b=document.createElement("button");b.className="chip";b.type="button";
+      b.innerHTML=pr.name+' <small>'+pr.en+'</small>';
+      b.addEventListener("click",function(){Object.keys(pr.set).forEach(function(k){P[k]=pr.set[k];});syncSliders();});
+      w.appendChild(b);});}
+
+  /* ---------- simulation ---------- */
+  var st=initState(), playing=false, speed=1, last=0, acc=0;
+  var DT=0.25, ENDYR=60;
+  var hist={Y:[],T:[],E:[],R:[]};
+  function resetSim(){st=initState();hist={Y:[100],T:[0],E:[0],R:[100]};playing=false;acc=0;$("playBtn").innerHTML="▶ Lancer";}
+
+  $("playBtn").addEventListener("click",function(){
+    if(st.year>=ENDYR)resetSim();
+    playing=!playing;last=performance.now();
+    $("playBtn").innerHTML=playing?"⏸ Pause":"▶ Lancer";
+  });
+  $("resetBtn").addEventListener("click",function(){resetSim();});
+  $("spd").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;
+    speed=parseFloat(b.dataset.s);
+    Array.prototype.forEach.call(this.children,function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});});
+
+  /* ---------- svg helpers ---------- */
+  function setFlow(id,val){var el=$(id);if(!el)return;var a=Math.abs(val);
+    if(a<0.5){el.style.animationPlayState="paused";el.style.opacity="0.15";return;}
+    el.style.animationPlayState="running";el.style.opacity=Math.min(1,0.32+a/60).toFixed(2);
+    el.style.setProperty("--spd",Math.min(6,Math.max(0.4,32/a)).toFixed(2)+"s");}
+  function level(id,top,h,frac){var el=$(id);if(!el)return;frac=Math.max(0,Math.min(1,frac));
+    var hh=h*frac;el.setAttribute("y",(top+h-hh).toFixed(1));el.setAttribute("height",hh.toFixed(1));}
+  function f0(v){return Math.round(v).toLocaleString("fr-FR");}
+  function f1(v){return (Math.round(v*10)/10).toLocaleString("fr-FR");}
+
+  /* ---------- charts ---------- */
+  function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+  function drawChart(cid,data,opts){
+    var cv=$(cid);var dpr=window.devicePixelRatio||1;var W=cv.clientWidth,H=cv.clientHeight;
+    if(!W){return;} cv.width=W*dpr;cv.height=H*dpr;var g=cv.getContext("2d");g.scale(dpr,dpr);
+    g.clearRect(0,0,W,H);var pad=4,bh=H-pad*2,bw=W-pad*2;
+    var lo=opts.lo, hi=opts.hi;
+    function X(i){return pad+ i/ENDYR*bw;}
+    function Y(v){return pad+bh-(v-lo)/(hi-lo)*bh;}
+    // guide lines
+    (opts.guides||[]).forEach(function(gl){g.strokeStyle=css(gl.c);g.globalAlpha=.5;g.setLineDash([3,4]);
+      g.beginPath();g.moveTo(pad,Y(gl.v));g.lineTo(W-pad,Y(gl.v));g.stroke();g.setLineDash([]);g.globalAlpha=1;});
+    // baseline
+    if(opts.base!=null){g.strokeStyle=css("--faint");g.globalAlpha=.4;g.setLineDash([2,3]);
+      g.beginPath();g.moveTo(pad,Y(opts.base));g.lineTo(W-pad,Y(opts.base));g.stroke();g.setLineDash([]);g.globalAlpha=1;}
+    // area+line
+    var col=css(opts.color);
+    g.beginPath();data.forEach(function(v,i){var x=X(i),y=Y(Math.max(lo,Math.min(hi,v)));i?g.lineTo(x,y):g.moveTo(x,y);});
+    g.lineTo(X(data.length-1),pad+bh);g.lineTo(X(0),pad+bh);g.closePath();g.globalAlpha=.10;g.fillStyle=col;g.fill();g.globalAlpha=1;
+    g.beginPath();data.forEach(function(v,i){var x=X(i),y=Y(Math.max(lo,Math.min(hi,v)));i?g.lineTo(x,y):g.moveTo(x,y);});
+    g.strokeStyle=col;g.lineWidth=2;g.lineJoin="round";g.stroke();
+    // endpoint
+    var lx=X(data.length-1),ly=Y(Math.max(lo,Math.min(hi,data[data.length-1])));
+    g.fillStyle=col;g.beginPath();g.arc(lx,ly,2.6,0,7);g.fill();
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    var L=P, s=st, Om=damage(s.Temp);
+    // svg tanks
+    level("w-res",24,84, s.Res/100);
+    level("w-mh",250,96, s.Dh/220);
+    level("w-ff",150,126, s.Df/100);
+    level("w-bk",196,104, s.L/220);
+    level("w-et",330,96, (-s.Gov)/160);
+    level("w-atm",560,104, Math.min(1,s.CumE/3200));
+    level("w-th",572,80, Math.min(1,s.Temp/5));
+    // atmosphere colour shifts to heat as it fills
+    var atm=$("w-atm"); atm.setAttribute("fill", s.Temp>2?css("--heat"):css("--emit"));
+    // svg values
+    $("v-res").textContent=f0(s.Res);
+    $("v-ff").textContent="dépôts "+f0(s.Df);
+    $("v-ffY").textContent="▸ production Y = "+f0(s.Y)+" /an";
+    $("v-mh").textContent="dépôts "+f0(s.Dh); $("v-bk").textContent="crédit "+f0(s.L); $("v-et").textContent="dette "+f0(-s.Gov);
+    $("v-cume").textContent=f0(s.CumE); $("v-pi").textContent=f1(s.pi)+" %";
+    $("v-temp").textContent="+"+f1(s.Temp)+"°";
+    // flows
+    var t=L.t/100, cEff=(L.c/100)*(1-C.psi*s.Temp);
+    var wages=0.6*s.Y, cons=cEff*(1-t)*s.Y, taxes=t*s.Y, spend=L.gpub;
+    var I=C.delta*s.K+L.credit+3*(L.green/100)-0.4*L.icb, credit=Math.max(0,I-C.delta*s.K);
+    var taxesF=t*0.4*s.Y, taxesH=t*0.6*s.Y, reserves=0.1*(s.Dh+s.Df);
+    setFlow("f-wage",wages);setFlow("f-cons",cons);
+    setFlow("f-tax",taxesF);setFlow("f-taxh",taxesH);setFlow("f-spend",spend);
+    setFlow("f-credit",credit+2);setFlow("f-govfin",Math.max(0,spend-taxes));
+    setFlow("f-bcres",3+0.06*s.L);
+    level("w-bc",24,80, reserves/40); $("v-bc").textContent="R "+f0(reserves);
+    var Edisp=Math.max(0,(L.ci0/100)*s.Y*(1-s.A)*(1-abate(L.ctax)));
+    setFlow("f-ext",C.kext*s.Y*30);setFlow("f-emit",Edisp);setFlow("f-dmg",Om*140);
+    // readouts
+    $("r-Y").textContent=f0(s.Y);
+    $("r-T").innerHTML="+"+f1(s.Temp)+' <small>°C</small>';
+    $("r-D").innerHTML=f0(Om*100)+' <small>%</small>';
+    $("r-P").innerHTML=f1(s.pi)+' <small>%</small>';
+    $("r-E").textContent=f0(Edisp); $("r-R").textContent=f0(s.Res);
+    $("r-ci").textContent=((L.ci0/100)*(1-s.A)).toFixed(2);
+    $("st-T").className="stat"+(s.Temp>=2?" hot":s.Temp>=1?" warn":"");
+    $("st-D").className="stat"+(Om>=0.10?" hot":Om>=0.03?" warn":"");
+    $("st-Y").className="stat"+(s.Y>=105?" good":s.Y<90?" warn":"");
+    // sfc
+    $("r-sfc").textContent=s.sfc?s.sfc.toFixed(2):"0.00";
+    // clock
+    $("yr").textContent=f0(s.year); $("prog").style.width=(s.year/ENDYR*100)+"%";
+    // charts
+    drawChart("ch-Y",hist.Y,{lo:40,hi:180,color:"--water",base:100});
+    drawChart("ch-T",hist.T,{lo:0,hi:5,color:"--heat",guides:[{v:1.5,c:"--warn"},{v:2,c:"--bad"}]});
+    drawChart("ch-E",hist.E,{lo:0,hi:90,color:"--emit"});
+    drawChart("ch-R",hist.R,{lo:0,hi:100,color:"--bio"});
+    $("cv-Y").textContent=f0(s.Y);$("cv-T").textContent="+"+f1(s.Temp)+"°";
+    $("cv-E").textContent=f0(s.E);$("cv-R").textContent=f0(s.Res);
+    updateBS(s);
+  }
+
+  function loop(now){
+    if(playing){
+      var dtr=(now-last)/1000; last=now; acc+=dtr*speed;
+      while(acc>=DT && st.year<ENDYR){ st=step(st,P,DT); acc-=DT;
+        if(Math.abs(st.year-Math.round(st.year))<1e-6){ // record ~ each year
+          hist.Y.push(st.Y);hist.T.push(st.Temp);hist.E.push(st.E);hist.R.push(st.Res);}
+      }
+      if(st.year>=ENDYR){playing=false;$("playBtn").innerHTML="↺ Rejouer";}
+    }
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  /* ---------- balance-sheet matrix ---------- */
+  var BS_SEC=[["mh","Ménages"],["ff","Firmes"],["bk","Banque"],["bc","B. centrale"],["et","État"]];
+  var BS_ROW=[["dep","Dépôts (monnaie)"],["cred","Crédit"],["res","Réserves"],["titres","Titres d'État"]];
+  function buildBS(){
+    var t=$("bs-table"),h="<thead><tr><th></th>";
+    BS_SEC.forEach(function(s){h+="<th>"+s[1]+"</th>";});
+    h+='<th class="sigcol">Σ</th></tr></thead><tbody>';
+    BS_ROW.forEach(function(r){h+='<tr><td>'+r[1]+'</td>';
+      BS_SEC.forEach(function(s){h+='<td id="bs_'+r[0]+'_'+s[0]+'">·</td>';});
+      h+='<td class="sigcol sig" id="bs_'+r[0]+'_sig">0</td></tr>';});
+    h+='<tr class="net"><td>Solde net financier</td>';
+    BS_SEC.forEach(function(s){h+='<td id="bs_net_'+s[0]+'">·</td>';});
+    h+='<td class="sigcol sig" id="bs_net_sig">0</td></tr></tbody>';
+    t.innerHTML=h;
+  }
+  function bsCell(id,v){var el=$(id);if(!el)return;
+    if(Math.abs(v)<0.5){el.textContent="·";el.className="zero";}
+    else if(v>0){el.textContent="+"+f0(v);el.className="pos";}
+    else{el.textContent="−"+f0(-v);el.className="neg";}}
+  function updateBS(s){
+    var D=s.Dh+s.Df, R=0.1*D, B=-s.Gov, Bbank=B-R;
+    var V={
+      dep:{mh:s.Dh, ff:s.Df, bk:-D, bc:0, et:0},
+      cred:{mh:0, ff:-s.L, bk:s.L, bc:0, et:0},
+      res:{mh:0, ff:0, bk:R, bc:-R, et:0},
+      titres:{mh:0, ff:0, bk:Bbank, bc:R, et:-B}
+    };
+    BS_ROW.forEach(function(r){var sum=0;
+      BS_SEC.forEach(function(sec){var v=V[r[0]][sec[0]];bsCell("bs_"+r[0]+"_"+sec[0],v);sum+=v;});
+      $("bs_"+r[0]+"_sig").textContent=Math.abs(sum)<0.5?"0":sum.toFixed(1);});
+    var net={mh:s.Dh, ff:s.Df-s.L, bk:0, bc:0, et:-B}, ns=0;
+    BS_SEC.forEach(function(sec){bsCell("bs_net_"+sec[0],net[sec[0]]);ns+=net[sec[0]];});
+    $("bs_net_sig").textContent=Math.abs(ns)<0.5?"0":ns.toFixed(1);
+    $("bs-memo").innerHTML="Mémo — les firmes ont un solde financier négatif ("+f0(s.Df-s.L)+"), compensé par leur capital productif réel <b>K = "+f0(s.K)+"</b> (actif réel, hors matrice financière). Total des patrimoines nets financiers = 0 (économie fermée).";
+  }
+
+  buildBS();buildPresets();buildControls();resetSim();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
