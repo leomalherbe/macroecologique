@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Correction en classe — Séance 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#EDF1F4;--surface:#FCFDFE;--panel:#F1F6F9;
+    --ink:#14202A;--muted:#556572;--faint:#84939E;--line:#DBE3EA;
+    --ipat:#2E8B57;--verh:#3F6BC0;--expo:#C0921C;--warn:#C0392B;
+    --shadow:0 1px 2px rgba(20,32,42,.05),0 14px 40px rgba(20,32,42,.09);
+    --font-d:"Spectral",Georgia,serif;--font-b:"IBM Plex Sans",system-ui,sans-serif;--font-m:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  :root:not([data-theme="light"]){@media (prefers-color-scheme:dark){
+    --bg:#0C1218;--surface:#141B22;--panel:#0F161D;
+    --ink:#E9F0F5;--muted:#9AA9B4;--faint:#6B7A86;--line:#26313A;
+    --ipat:#46B074;--verh:#6E97E6;--expo:#D8AC38;--warn:#E0705F;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 16px 44px rgba(0,0,0,.5);
+  }}
+  :root[data-theme="dark"]{
+    --bg:#0C1218;--surface:#141B22;--panel:#0F161D;
+    --ink:#E9F0F5;--muted:#9AA9B4;--faint:#6B7A86;--line:#26313A;
+    --ipat:#46B074;--verh:#6E97E6;--expo:#D8AC38;--warn:#E0705F;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 16px 44px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-b);-webkit-font-smoothing:antialiased;}
+  #deck{height:100vh;display:flex;flex-direction:column;}
+  .stagewrap{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:clamp(18px,4vh,44px) clamp(18px,5vw,64px);cursor:pointer;position:relative;}
+  .stage{width:100%;max-width:1000px;margin-block:auto;}
+
+  /* generic slide bits */
+  .tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-m);font-size:clamp(11px,1.3vw,13px);font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:5px 12px;border-radius:20px;}
+  .tag.ipat{color:var(--ipat);background:color-mix(in srgb,var(--ipat) 14%,transparent);}
+  .tag.verh{color:var(--verh);background:color-mix(in srgb,var(--verh) 14%,transparent);}
+  .tag.expo{color:var(--expo);background:color-mix(in srgb,var(--expo) 16%,transparent);}
+  .qnum{font-family:var(--font-m);font-size:clamp(12px,1.4vw,14px);color:var(--faint);font-weight:600;}
+  .qhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+  h2.qt{font-family:var(--font-d);font-weight:600;font-size:clamp(22px,3.4vw,33px);line-height:1.12;margin:0 0 16px;letter-spacing:-.015em;text-wrap:balance;}
+  .intro{font-size:clamp(15px,1.9vw,20px);line-height:1.62;color:var(--muted);margin:0 0 12px;max-width:88ch;text-wrap:pretty;}
+  .intro b{color:var(--ink);font-weight:600;} .intro i{font-family:var(--font-d);font-style:italic;}
+
+  .reso{margin-top:20px;border-top:2px solid var(--line);padding-top:16px;}
+  .resoh{font-family:var(--font-m);font-size:clamp(10px,1.2vw,12px);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:12px;}
+  .calcline{font-family:var(--font-m);font-size:clamp(15px,2.1vw,22px);line-height:1.5;color:var(--ink);padding:7px 0 7px 20px;position:relative;white-space:normal;overflow-wrap:break-word;}
+  .calcline::before{content:"";position:absolute;left:0;top:14px;width:9px;height:9px;border-radius:50%;background:var(--accent,var(--ipat));opacity:.55;}
+  .calcline .op{color:var(--faint);}
+  .calcline b{color:var(--accent,var(--ipat));font-weight:600;}
+  .answer{margin-top:16px;display:inline-flex;flex-direction:column;gap:6px;}
+  .answer .pill{display:inline-flex;align-items:center;gap:12px;font-family:var(--font-m);font-size:clamp(20px,3vw,30px);font-weight:600;color:#fff;background:var(--accent,var(--ipat));border-radius:12px;padding:12px 22px;box-shadow:var(--shadow);}
+  .answer .pill .lbl{font-family:var(--font-b);font-size:clamp(11px,1.3vw,13px);font-weight:500;opacity:.85;text-transform:uppercase;letter-spacing:.06em;}
+  .answer .note{font-size:clamp(13px,1.6vw,16px);color:var(--muted);max-width:80ch;text-wrap:pretty;margin-top:2px;}
+  .answer .note b{color:var(--ink);font-weight:600;}
+
+  /* fragments */
+  .frag{opacity:0;transform:translateY(8px);transition:opacity .3s ease,transform .3s ease;}
+  .frag.on{opacity:1;transform:none;}
+
+  /* title slide */
+  .title-slide{text-align:center;}
+  .title-slide .eye{font-family:var(--font-m);font-size:clamp(12px,1.5vw,15px);letter-spacing:.16em;text-transform:uppercase;color:var(--ipat);font-weight:500;margin:0 0 14px;}
+  .title-slide h1{font-family:var(--font-d);font-weight:600;font-size:clamp(34px,6vw,60px);line-height:1.02;margin:0;letter-spacing:-.02em;text-wrap:balance;}
+  .title-slide .ts{color:var(--muted);font-size:clamp(15px,2vw,20px);margin:18px auto 0;max-width:60ch;text-wrap:pretty;}
+  .hintbar{margin-top:30px;font-family:var(--font-m);font-size:13px;color:var(--faint);}
+  .hintbar kbd{font-family:var(--font-m);border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--muted);}
+
+  /* tools slide */
+  .tools h2,.end h2{font-family:var(--font-d);font-weight:600;font-size:clamp(24px,3.6vw,34px);margin:0 0 22px;letter-spacing:-.01em;}
+  .toolcard{display:grid;grid-template-columns:150px 1fr;gap:18px;align-items:baseline;padding:16px 0;border-top:1px solid var(--line);}
+  .toolcard:first-of-type{border-top:none;}
+  .toolcard .tf{font-size:clamp(15px,1.9vw,19px);color:var(--muted);line-height:1.55;text-wrap:pretty;}
+  .toolcard .tf b{font-family:var(--font-m);color:var(--ink);font-weight:600;}
+  .toolcard .tf .lb{font-family:var(--font-m);font-size:.8em;color:var(--faint);letter-spacing:.03em;margin-right:8px;display:inline-block;min-width:96px;}
+  .end ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:16px;}
+  .end li{font-size:clamp(16px,2.1vw,21px);color:var(--muted);line-height:1.5;padding-left:30px;position:relative;text-wrap:pretty;}
+  .end li::before{content:"→";position:absolute;left:0;color:var(--ipat);font-weight:700;}
+  .end li b{color:var(--ink);font-weight:600;} .end li .m{font-family:var(--font-m);color:var(--ink);}
+
+  /* bottom bar */
+  .bar{flex-shrink:0;display:flex;align-items:center;gap:14px;padding:10px clamp(16px,4vw,40px);border-top:1px solid var(--line);background:var(--surface);}
+  .bar .prog{flex:1;height:5px;border-radius:3px;background:var(--line);overflow:hidden;}
+  .bar .prog i{display:block;height:100%;background:var(--ipat);border-radius:3px;transition:width .3s;}
+  .nav{display:flex;gap:8px;}
+  .nb{font-family:var(--font-m);font-size:15px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:9px;width:40px;height:38px;cursor:pointer;display:grid;place-items:center;}
+  .nb:hover{color:var(--ink);border-color:var(--faint);}
+  .nb:disabled{opacity:.35;cursor:default;}
+  .counter{font-family:var(--font-m);font-size:13px;color:var(--muted);min-width:104px;text-align:center;font-variant-numeric:tabular-nums;}
+  .util{display:flex;gap:8px;}
+  .ub{font-family:var(--font-m);font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:9px;padding:0 12px;height:38px;cursor:pointer;}
+  .ub:hover{color:var(--ink);border-color:var(--faint);}
+  @media (max-width:640px){.counter{min-width:0;} .util{display:none;}}
+</style>
+
+<div id="deck">
+  <div class="stagewrap" id="stagewrap">
+    <div class="stage" id="stage"></div>
+  </div>
+  <div class="bar">
+    <div class="nav">
+      <button class="nb" id="prev" aria-label="Précédent">‹</button>
+      <button class="nb" id="next" aria-label="Suivant">›</button>
+    </div>
+    <div class="counter" id="counter"></div>
+    <div class="prog"><i id="progfill"></i></div>
+    <div class="util">
+      <button class="ub" id="lang" aria-label="Langue">FR</button>
+      <button class="ub" id="theme" aria-label="Thème">◐</button>
+      <button class="ub" id="full" aria-label="Plein écran">⤢ Plein écran</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var Q=[
+    { n:1, tag:"ipat", tagL:"IPAT · combiner des taux",
+      title:"Population +1 %, consommation +5 %, technologie −2 % : quelle variation de l’impact ?",
+      intro:[
+        "Sur un territoire, trois choses évoluent en même temps : la <b>population</b> augmente de 1 %, la <b>consommation par personne</b> de 5 %, et le <b>progrès technique</b> réduit l’impact de 2 %.",
+        "Le réflexe naturel — additionner les taux (1 + 5 − 2 = 4 %) — est <b>faux</b>. Dans l’identité IPAT, les trois leviers se <b>multiplient</b> : il faut composer les coefficients."
+      ],
+      steps:[
+        "ΔI/I = (1 + ΔP/P)(1 + ΔA/A)(1 + ΔT/T) − 1",
+        "ΔI/I = (1 + 0,01)(1 + 0,05)(1 − 0,02) − 1",
+        "ΔI/I = 1,01 × 1,05 × 0,98 − 1",
+        "ΔI/I = <b>1,0605</b> × 0,98 − 1",
+        "ΔI/I = <b>1,03929</b> − 1",
+        "ΔI/I = <b>0,03929</b>"
+      ],
+      ans:"+3,929 %", note:"L’addition aurait donné 4 % : proche, mais faux — les leviers se multiplient." },
+
+    { n:2, tag:"ipat", tagL:"IPAT · trouver un seuil",
+      title:"Jusqu’où le PIB/habitant peut-il croître sans aggraver l’impact ?",
+      intro:[
+        "La <b>population</b> croît de 2 % (ΔP/P) et la <b>technologie</b> gagne 1 % d’efficacité (ΔT/T = −1 %, coefficient 0,99). Question : quelle croissance du PIB par habitant laisse l’impact <b>stable</b> ?",
+        "On cherche le taux <b>ΔA/A</b> tel que le produit des coefficients vaut <b>exactement 1</b> : c’est la frontière au-delà de laquelle l’impact augmente."
+      ],
+      steps:[
+        "Condition de stabilité : (1 + 0,02)(1 + ΔA/A)(1 − 0,01) = 1",
+        "1,02 × (1 + ΔA/A) × 0,99 = 1",
+        "1 + ΔA/A = 1 / (1,02 × 0,99)",
+        "1 + ΔA/A = 1 / 1,0098",
+        "1 + ΔA/A = <b>0,99030</b>",
+        "ΔA/A = 0,99030 − 1 = <b>−0,0097</b>"
+      ],
+      ans:"−0,97 %", note:"Contre-intuitif : même ainsi, le niveau de vie doit <b>baisser</b> de 0,97 % pour ne pas aggraver l’impact." },
+
+    { n:3, tag:"expo", tagL:"Exponentielle · temps de doublement",
+      title:"En combien d’années une économie à 4 % par an double-t-elle ?",
+      intro:[
+        "Une économie croît de 4 % par an. C’est une <b>croissance composée</b> : chaque année multiplie la taille par 1,04.",
+        "On cherche le nombre d’années T tel que la taille ait doublé, c’est-à-dire (1,04)<sup>T</sup> = 2."
+      ],
+      steps:[
+        "(1,04)<sup>T</sup> = 2",
+        "On passe au logarithme : ln(a<sup>T</sup>) = T × ln(a)",
+        "T × ln(1,04) = ln(2)",
+        "T = ln(2) / ln(1,04)",
+        "T = 0,6931 / 0,03922",
+        "T = <b>17,67</b> ans"
+      ],
+      ans:"≈ 18 ans", note:"" },
+
+    { n:4, tag:"verh", tagL:"Verhulst · dépassement de la capacité de charge",
+      title:"+3 °C, PIB mondial −20 %, croissance intrinsèque 5 % : de combien dépasse-t-on la capacité de charge ?",
+      intro:[
+        "Une étude <i>Nature</i> (2024) estime qu’à +3 °C, le PIB mondial serait <b>20 % plus bas</b>. On applique le modèle de Verhulst à l’économie : le taux <b>observé</b> R dépend de la distance à la capacité de charge K.",
+        "Ici le taux observé est R = −20 % (la contraction) et le taux <b>intrinsèque</b> est r = 5 %. On en déduit le rapport N/K."
+      ],
+      steps:[
+        "R = r (1 − N/K)",
+        "−0,20 = 0,05 (1 − N/K)",
+        "1 − N/K = −0,20 / 0,05 = <b>−4</b>",
+        "N/K = 1 + 4 = <b>5</b>"
+      ],
+      ans:"N/K = 5", note:"L’économie serait à <b>5 fois</b> la capacité de charge : la chute de 20 % est le « rappel » d’un système en fort dépassement." },
+
+    { n:5, tag:"ipat", tagL:"IPAT · combiner des taux",
+      title:"Population −0,5 %, PIB/hab +2 %, technologies vertes −1,2 % : impact net ?",
+      intro:[
+        "Deux leviers tirent vers le <b>bas</b> (la population baisse de 0,5 %, la technologie de 1,2 %) et un seul pousse vers le <b>haut</b> (le PIB par habitant, +2 %).",
+        "Qui l’emporte ? On compose les trois coefficients."
+      ],
+      steps:[
+        "ΔI/I = (1 − 0,005)(1 + 0,02)(1 − 0,012) − 1",
+        "ΔI/I = 0,995 × 1,02 × 0,988 − 1",
+        "ΔI/I = <b>1,0149</b> × 0,988 − 1",
+        "ΔI/I = <b>1,00272</b> − 1",
+        "ΔI/I = <b>0,00272</b>"
+      ],
+      ans:"+0,27 %", note:"L’impact augmente encore : le +2 % de niveau de vie l’emporte sur les deux baisses." },
+
+    { n:6, tag:"expo", tagL:"Exponentielle · épuisement d’un stock",
+      title:"Phosphore : 300 ans de réserve, mais extraction +0,7 % par an. Combien reste-t-il ?",
+      intro:[
+        "Les réserves durent 300 ans <b>au rythme actuel</b>. Le stock vaut donc 300 fois l’extraction d’une année.",
+        "Mais si l’extraction suit la population (+0,7 % par an), elle <b>augmente</b> chaque année : le stock se vide plus vite. On cumule l’extraction croissante jusqu’à l’épuiser."
+      ],
+      steps:[
+        "Chaque année, l’extraction grossit (E = extraction actuelle) : E, E × 1,007, E × 1,007<sup>2</sup>, …, E × 1,007<sup>T−1</sup>",
+        "On additionne tout — c’est une somme géométrique :",
+        "Total extrait sur T ans = E × (1,007<sup>T</sup> − 1) / 0,007",
+        "Ce total doit épuiser le stock, qui vaut 300 × E :",
+        "E × (1,007<sup>T</sup> − 1) / 0,007 = 300 × E",
+        "On simplifie par E : (1,007<sup>T</sup> − 1) / 0,007 = 300",
+        "1,007<sup>T</sup> = 1 + 0,007 × 300 = <b>3,1</b>",
+        "T = ln(3,1) / ln(1,007) = 1,1314 / 0,006976"
+      ],
+      ans:"≈ 162 ans", note:"Bien <b>moins</b> que 300 ans : une consommation qui croît épuise le stock plus vite." },
+
+    { n:7, tag:"verh", tagL:"Verhulst · point d’inflexion",
+      title:"K = 5 M, population = 2,5 M, r = 3 % : le taux au point de bascule ?",
+      intro:[
+        "L’écosystème porte au maximum 5 millions d’habitants (K). La population est à 2,5 millions — exactement <b>la moitié de K</b>.",
+        "En N = K/2, la croissance <b>absolue</b> est à son maximum : au-delà, elle ralentit. On cherche le taux (par habitant) atteint en ce point."
+      ],
+      steps:[
+        "Position : N/K = 2,5 / 5 = <b>0,5</b>",
+        "R = r (1 − N/K)",
+        "R = 0,03 × (1 − 0,5)",
+        "R = 0,03 × 0,5",
+        "R = <b>0,015</b>"
+      ],
+      ans:"1,5 %", note:"En N = K/2, le taux tombe à la moitié du taux intrinsèque (3 % → 1,5 %)." },
+
+    { n:8, tag:"ipat", tagL:"IPAT · découplage relatif",
+      title:"PIB +3,1 %, intensité énergétique −2,5 %, population constante : l’énergie totale ?",
+      intro:[
+        "La consommation d’énergie = PIB × intensité énergétique (énergie par unité de PIB).",
+        "L’intensité baisse de 2,5 % — c’est un découplage <b>relatif</b> — mais suffit-il à faire baisser l’énergie en <b>absolu</b> ?"
+      ],
+      steps:[
+        "ΔE/E = (1 + 0,031)(1 − 0,025) − 1",
+        "ΔE/E = 1,031 × 0,975 − 1",
+        "ΔE/E = <b>1,005225</b> − 1",
+        "ΔE/E = <b>0,005225</b>"
+      ],
+      ans:"+0,52 %", note:"L’énergie augmente encore : découplage relatif, pas absolu." },
+
+    { n:9, tag:"verh", tagL:"Verhulst · au-delà de la capacité de charge",
+      title:"1,75 planète, croissance intrinsèque 2,5 % : quel taux observé ?",
+      intro:[
+        "L’humanité consomme l’équivalent de 1,75 planète : on est <b>au-dessus</b> de la capacité de charge (N/K = 1,75).",
+        "Quand on dépasse K, le terme (1 − N/K) devient <b>négatif</b> : le modèle de Verhulst prévoit une contraction."
+      ],
+      steps:[
+        "R = r (1 − N/K)",
+        "R = 0,025 × (1 − 1,75)",
+        "R = 0,025 × (−0,75)",
+        "R = <b>−0,01875</b>"
+      ],
+      ans:"−1,875 %", note:"Au-delà de K, la dynamique pousse à la baisse : le niveau d’impact n’est pas soutenable." },
+
+    { n:10, tag:"ipat", tagL:"IPAT · effet rebond",
+      title:"Bus : +40 % de circulation (rebond), efficacité +15 %. Quelle variation des émissions ?",
+      intro:[
+        "La ville baisse les tarifs de 30 %, ce qui fait <b>+40 % de bus</b> en circulation : c’est l’<b>effet rebond</b> (la baisse de prix cause la hausse d’usage). Les bus électriques améliorent l’efficacité de 15 %.",
+        "Piège : la baisse de 30 % n’entre <b>pas</b> dans le calcul — elle est déjà « contenue » dans le +40 %. Il reste deux leviers : le nombre de bus et l’efficacité."
+      ],
+      steps:[
+        "Deux facteurs : (1 + 0,40) pour les bus, (1 − 0,15) pour les émissions par bus",
+        "ΔCO₂ = (1 + 0,40)(1 − 0,15) − 1",
+        "ΔCO₂ = 1,40 × 0,85 − 1",
+        "ΔCO₂ = <b>1,19</b> − 1",
+        "ΔCO₂ = <b>0,19</b>"
+      ],
+      ans:"+19 %", note:"Le gain d’efficacité (15 %) ne compense pas le rebond (+40 %) : les émissions augmentent." },
+
+    { n:11, tag:"ipat", tagL:"IPAT · condition de découplage absolu",
+      title:"PIB/hab +2,5 %, population +0,8 % : quel progrès technique pour stabiliser l’impact ?",
+      intro:[
+        "Pour un <b>découplage absolu</b>, l’impact doit rester <b>stable</b> : le produit des coefficients vaut 1.",
+        "On connaît deux leviers (richesse et population), on cherche le troisième : le taux <b>ΔT/T</b> d’amélioration technologique requis."
+      ],
+      steps:[
+        "(1 + 0,025)(1 + 0,008)(1 + ΔT/T) = 1",
+        "1,025 × 1,008 × (1 + ΔT/T) = 1",
+        "1 + ΔT/T = 1 / (1,025 × 1,008)",
+        "1 + ΔT/T = 1 / 1,03320",
+        "1 + ΔT/T = <b>0,96787</b>",
+        "ΔT/T = 0,96787 − 1 = <b>−0,03213</b>"
+      ],
+      ans:"−3,21 % par an", note:"Bien plus rapide que le rythme historique (~1 à 1,5 %/an) : d’où la difficulté du découplage absolu." },
+
+    { n:12, tag:"ipat", tagL:"IPAT · deux leviers pertinents",
+      title:"Suède : électricité/hab +1,5 %, intensité carbone −2 %. Empreinte carbone nette ?",
+      intro:[
+        "L’empreinte carbone de l’électricité (on la note <b>C</b>) = consommation × intensité carbone. La consommation par habitant monte de 1,5 % (LED, pompes à chaleur), l’intensité du mix baisse de 2 %.",
+        "Le « −3 % d’émissions domestiques depuis 2010 » est un <b>décor</b> : ce n’est pas un facteur du calcul demandé."
+      ],
+      steps:[
+        "ΔC/C = (1 + 0,015)(1 − 0,02) − 1",
+        "ΔC/C = 1,015 × 0,98 − 1",
+        "ΔC/C = <b>0,9947</b> − 1",
+        "ΔC/C = <b>−0,0053</b>"
+      ],
+      ans:"−0,53 %", note:"Découplage absolu, mais tout juste : la hausse de consommation ronge presque tout le gain du mix." }
+  ];
+
+  var ACC={ipat:"var(--ipat)",verh:"var(--verh)",expo:"var(--expo)"};
+
+  var L='fr'; try{var sl=localStorage.getItem('supp_lang'); if(sl==='en'||sl==='fr')L=sl;}catch(e){}
+
+  var UI={
+    fr:{ eye:"Macroéconomie écologique · Séance 1", h1:"Correction du quiz",
+      hint:'<kbd>→</kbd> / <kbd>Espace</kbd> avancer &nbsp;·&nbsp; <kbd>←</kbd> revenir',
+      toolsH:"Trois outils suffisent", expoTag:"Exponentielle", endH:"À retenir",
+      endLis:[
+        "Les taux se <b>multiplient</b> (IPAT) — ils ne s’additionnent pas.",
+        "Verhulst : <span class=\"m\">R = r (1 − N/K)</span> — au-delà de la capacité de charge, le taux devient négatif.",
+        "Le découplage <b>absolu</b> exige un progrès technique rapide (ici −3,21 %/an) — rarement atteint dans la réalité.",
+        "Une consommation qui <b>croît</b> épuise les stocks plus vite qu’un calcul « au rythme actuel » ne le laisse croire."
+      ],
+      reso:"Résolution", rep:"Réponse", quest:"Question", of12:"/ 12", stepw:"étape",
+      title:"Titre", toolbox:"Boîte à outils", summary:"Synthèse", full:"⤢ Plein écran" },
+    en:{ eye:"Ecological macroeconomics · Session 1", h1:"Quiz correction",
+      hint:'<kbd>→</kbd> / <kbd>Space</kbd> next &nbsp;·&nbsp; <kbd>←</kbd> back',
+      toolsH:"Three tools are enough", expoTag:"Exponential", endH:"Takeaways",
+      endLis:[
+        "Rates <b>multiply</b> (IPAT) — they don’t add.",
+        "Verhulst: <span class=\"m\">R = r (1 − N/K)</span> — beyond carrying capacity, the rate turns negative.",
+        "<b>Absolute</b> decoupling requires fast technical progress (here −3.21%/yr) — rarely achieved in reality.",
+        "Rising consumption depletes stocks faster than a “current-rate” calculation suggests."
+      ],
+      reso:"Working", rep:"Answer", quest:"Question", of12:"/ 12", stepw:"step",
+      title:"Title", toolbox:"Toolbox", summary:"Summary", full:"⤢ Full screen" }
+  };
+
+  var QEN=[
+    { n:1, tag:"ipat", tagL:"IPAT · combining rates",
+      title:"Population +1%, consumption +5%, technology −2%: what change in impact?",
+      intro:[
+        "In a territory, three things change at once: <b>population</b> rises 1%, <b>consumption per person</b> 5%, and <b>technical progress</b> cuts impact by 2%.",
+        "The natural reflex — adding the rates (1 + 5 − 2 = 4%) — is <b>wrong</b>. In the IPAT identity the three levers <b>multiply</b>: you compose the coefficients."
+      ],
+      steps:[
+        "ΔI/I = (1 + ΔP/P)(1 + ΔA/A)(1 + ΔT/T) − 1",
+        "ΔI/I = (1 + 0.01)(1 + 0.05)(1 − 0.02) − 1",
+        "ΔI/I = 1.01 × 1.05 × 0.98 − 1",
+        "ΔI/I = <b>1.0605</b> × 0.98 − 1",
+        "ΔI/I = <b>1.03929</b> − 1",
+        "ΔI/I = <b>0.03929</b>"
+      ],
+      ans:"+3.929%", note:"Adding would give 4%: close, but wrong — the levers multiply." },
+
+    { n:2, tag:"ipat", tagL:"IPAT · finding a threshold",
+      title:"How far can GDP per capita grow without worsening impact?",
+      intro:[
+        "<b>Population</b> grows 2% (ΔP/P) and <b>technology</b> gains 1% efficiency (ΔT/T = −1%, coefficient 0.99). Question: what growth of GDP per capita leaves impact <b>stable</b>?",
+        "We look for the rate <b>ΔA/A</b> such that the product of coefficients equals <b>exactly 1</b>: the boundary beyond which impact rises."
+      ],
+      steps:[
+        "Stability condition: (1 + 0.02)(1 + ΔA/A)(1 − 0.01) = 1",
+        "1.02 × (1 + ΔA/A) × 0.99 = 1",
+        "1 + ΔA/A = 1 / (1.02 × 0.99)",
+        "1 + ΔA/A = 1 / 1.0098",
+        "1 + ΔA/A = <b>0.99030</b>",
+        "ΔA/A = 0.99030 − 1 = <b>−0.0097</b>"
+      ],
+      ans:"−0.97%", note:"Counter-intuitive: even so, living standards must <b>fall</b> by 0.97% to avoid worsening impact." },
+
+    { n:3, tag:"expo", tagL:"Exponential · doubling time",
+      title:"How many years for an economy growing 4% a year to double?",
+      intro:[
+        "An economy grows 4% a year. This is <b>compound growth</b>: each year multiplies the size by 1.04.",
+        "We look for the number of years T such that the size has doubled, i.e. (1.04)<sup>T</sup> = 2."
+      ],
+      steps:[
+        "(1.04)<sup>T</sup> = 2",
+        "Take the logarithm: ln(a<sup>T</sup>) = T × ln(a)",
+        "T × ln(1.04) = ln(2)",
+        "T = ln(2) / ln(1.04)",
+        "T = 0.6931 / 0.03922",
+        "T = <b>17.67</b> years"
+      ],
+      ans:"≈ 18 years", note:"" },
+
+    { n:4, tag:"verh", tagL:"Verhulst · overshooting carrying capacity",
+      title:"+3 °C, world GDP −20%, intrinsic growth 5%: by how much is carrying capacity exceeded?",
+      intro:[
+        "A <i>Nature</i> study (2024) estimates that at +3 °C world GDP would be <b>20% lower</b>. We apply Verhulst’s model to the economy: the <b>observed</b> rate R depends on the distance to carrying capacity K.",
+        "Here the observed rate is R = −20% (the contraction) and the <b>intrinsic</b> rate is r = 5%. We deduce the ratio N/K."
+      ],
+      steps:[
+        "R = r (1 − N/K)",
+        "−0.20 = 0.05 (1 − N/K)",
+        "1 − N/K = −0.20 / 0.05 = <b>−4</b>",
+        "N/K = 1 + 4 = <b>5</b>"
+      ],
+      ans:"N/K = 5", note:"The economy would be at <b>5 times</b> carrying capacity: the 20% drop is the “pull-back” of a system in heavy overshoot." },
+
+    { n:5, tag:"ipat", tagL:"IPAT · combining rates",
+      title:"Population −0.5%, GDP/capita +2%, green tech −1.2%: net impact?",
+      intro:[
+        "Two levers pull <b>down</b> (population falls 0.5%, technology 1.2%) and only one pushes <b>up</b> (GDP per capita, +2%).",
+        "Which wins? We compose the three coefficients."
+      ],
+      steps:[
+        "ΔI/I = (1 − 0.005)(1 + 0.02)(1 − 0.012) − 1",
+        "ΔI/I = 0.995 × 1.02 × 0.988 − 1",
+        "ΔI/I = <b>1.0149</b> × 0.988 − 1",
+        "ΔI/I = <b>1.00272</b> − 1",
+        "ΔI/I = <b>0.00272</b>"
+      ],
+      ans:"+0.27%", note:"Impact still rises: the +2% in living standards outweighs the two decreases." },
+
+    { n:6, tag:"expo", tagL:"Exponential · depleting a stock",
+      title:"Phosphorus: 300 years of reserves, but extraction +0.7% a year. How much is left?",
+      intro:[
+        "Reserves last 300 years <b>at the current rate</b>. So the stock is worth 300 times one year’s extraction.",
+        "But if extraction follows population (+0.7% a year), it <b>rises</b> every year: the stock empties faster. We add up the growing extraction until it runs out."
+      ],
+      steps:[
+        "Each year, extraction grows (E = current extraction): E, E × 1.007, E × 1.007<sup>2</sup>, …, E × 1.007<sup>T−1</sup>",
+        "We add it all up — this is a geometric series:",
+        "Total extracted over T years = E × (1.007<sup>T</sup> − 1) / 0.007",
+        "This total must deplete the stock, worth 300 × E:",
+        "E × (1.007<sup>T</sup> − 1) / 0.007 = 300 × E",
+        "Simplify by E: (1.007<sup>T</sup> − 1) / 0.007 = 300",
+        "1.007<sup>T</sup> = 1 + 0.007 × 300 = <b>3.1</b>",
+        "T = ln(3.1) / ln(1.007) = 1.1314 / 0.006976"
+      ],
+      ans:"≈ 162 years", note:"Far <b>less</b> than 300 years: rising consumption depletes the stock faster." },
+
+    { n:7, tag:"verh", tagL:"Verhulst · inflection point",
+      title:"K = 5 M, population = 2.5 M, r = 3%: the rate at the tipping point?",
+      intro:[
+        "The ecosystem supports at most 5 million inhabitants (K). Population is at 2.5 million — exactly <b>half of K</b>.",
+        "At N = K/2, <b>absolute</b> growth is at its maximum: beyond it, growth slows. We look for the (per-capita) rate reached at this point."
+      ],
+      steps:[
+        "Position: N/K = 2.5 / 5 = <b>0.5</b>",
+        "R = r (1 − N/K)",
+        "R = 0.03 × (1 − 0.5)",
+        "R = 0.03 × 0.5",
+        "R = <b>0.015</b>"
+      ],
+      ans:"1.5%", note:"At N = K/2, the rate falls to half the intrinsic rate (3% → 1.5%)." },
+
+    { n:8, tag:"ipat", tagL:"IPAT · relative decoupling",
+      title:"GDP +3.1%, energy intensity −2.5%, constant population: total energy?",
+      intro:[
+        "Energy consumption = GDP × energy intensity (energy per unit of GDP).",
+        "Intensity falls 2.5% — a <b>relative</b> decoupling — but is it enough to cut energy in <b>absolute</b> terms?"
+      ],
+      steps:[
+        "ΔE/E = (1 + 0.031)(1 − 0.025) − 1",
+        "ΔE/E = 1.031 × 0.975 − 1",
+        "ΔE/E = <b>1.005225</b> − 1",
+        "ΔE/E = <b>0.005225</b>"
+      ],
+      ans:"+0.52%", note:"Energy still rises: relative decoupling, not absolute." },
+
+    { n:9, tag:"verh", tagL:"Verhulst · beyond carrying capacity",
+      title:"1.75 planets, intrinsic growth 2.5%: what observed rate?",
+      intro:[
+        "Humanity uses the equivalent of 1.75 planets: we are <b>above</b> carrying capacity (N/K = 1.75).",
+        "When K is exceeded, the term (1 − N/K) becomes <b>negative</b>: Verhulst’s model predicts a contraction."
+      ],
+      steps:[
+        "R = r (1 − N/K)",
+        "R = 0.025 × (1 − 1.75)",
+        "R = 0.025 × (−0.75)",
+        "R = <b>−0.01875</b>"
+      ],
+      ans:"−1.875%", note:"Beyond K, the dynamics push downward: the impact level is not sustainable." },
+
+    { n:10, tag:"ipat", tagL:"IPAT · rebound effect",
+      title:"Buses: +40% circulation (rebound), efficiency +15%. What change in emissions?",
+      intro:[
+        "The city cuts fares by 30%, which brings <b>+40% buses</b> in circulation: the <b>rebound effect</b> (the price cut causes the rise in use). Electric buses improve efficiency by 15%.",
+        "Trap: the 30% cut does <b>not</b> enter the calculation — it is already “contained” in the +40%. Two levers remain: the number of buses and efficiency."
+      ],
+      steps:[
+        "Two factors: (1 + 0.40) for buses, (1 − 0.15) for emissions per bus",
+        "ΔCO₂ = (1 + 0.40)(1 − 0.15) − 1",
+        "ΔCO₂ = 1.40 × 0.85 − 1",
+        "ΔCO₂ = <b>1.19</b> − 1",
+        "ΔCO₂ = <b>0.19</b>"
+      ],
+      ans:"+19%", note:"The efficiency gain (15%) does not offset the rebound (+40%): emissions rise." },
+
+    { n:11, tag:"ipat", tagL:"IPAT · condition for absolute decoupling",
+      title:"GDP/capita +2.5%, population +0.8%: what technical progress to stabilise impact?",
+      intro:[
+        "For <b>absolute decoupling</b>, impact must stay <b>stable</b>: the product of coefficients equals 1.",
+        "We know two levers (wealth and population); we look for the third: the required rate <b>ΔT/T</b> of technological improvement."
+      ],
+      steps:[
+        "(1 + 0.025)(1 + 0.008)(1 + ΔT/T) = 1",
+        "1.025 × 1.008 × (1 + ΔT/T) = 1",
+        "1 + ΔT/T = 1 / (1.025 × 1.008)",
+        "1 + ΔT/T = 1 / 1.03320",
+        "1 + ΔT/T = <b>0.96787</b>",
+        "ΔT/T = 0.96787 − 1 = <b>−0.03213</b>"
+      ],
+      ans:"−3.21% a year", note:"Far faster than the historical pace (~1 to 1.5%/yr): hence the difficulty of absolute decoupling." },
+
+    { n:12, tag:"ipat", tagL:"IPAT · two relevant levers",
+      title:"Sweden: electricity/capita +1.5%, carbon intensity −2%. Net carbon footprint?",
+      intro:[
+        "The carbon footprint of electricity (call it <b>C</b>) = consumption × carbon intensity. Consumption per capita rises 1.5% (LEDs, heat pumps), the mix’s intensity falls 2%.",
+        "The “−3% of domestic emissions since 2010” is a <b>distractor</b>: it is not a factor in the calculation asked."
+      ],
+      steps:[
+        "ΔC/C = (1 + 0.015)(1 − 0.02) − 1",
+        "ΔC/C = 1.015 × 0.98 − 1",
+        "ΔC/C = <b>0.9947</b> − 1",
+        "ΔC/C = <b>−0.0053</b>"
+      ],
+      ans:"−0.53%", note:"Absolute decoupling, but only just: the rise in consumption eats almost all the gain from the mix." }
+  ];
+
+  function QA(){ return L==='en'?QEN:Q; }
+
+  // build the ordered slide list
+  var slides=[];
+  slides.push({kind:"title"});
+  slides.push({kind:"tools"});
+  Q.forEach(function(q,idx){slides.push({kind:"q",qi:idx});});
+  slides.push({kind:"end"});
+  var LAST=slides.length-1;
+
+  var cur=0, step=0, frags=[];
+
+  function build(s){
+    var u=UI[L];
+    if(s.kind==="title"){
+      return '<div class="title-slide">'+
+        '<p class="eye">'+u.eye+'</p>'+
+        '<h1>'+u.h1+'</h1>'+
+        '<p class="hintbar">'+u.hint+'</p>'+
+        '</div>';
+    }
+    if(s.kind==="tools"){
+      return '<div class="tools">'+
+        '<h2>'+u.toolsH+'</h2>'+
+        '<div class="toolcard"><span class="tag ipat">IPAT</span><span class="tf"><b>ΔI/I = (1 + ΔP/P)(1 + ΔA/A)(1 + ΔT/T) − 1</b></span></div>'+
+        '<div class="toolcard"><span class="tag verh">Verhulst</span><span class="tf"><b>R = r (1 − N/K)</b></span></div>'+
+        '<div class="toolcard"><span class="tag expo">'+u.expoTag+'</span><span class="tf"><b>ln(a<sup>T</sup>) = T × ln(a)</b></span></div>'+
+        '</div>';
+    }
+    if(s.kind==="end"){
+      var lis=u.endLis.map(function(x){return '<li class="frag">'+x+'</li>';}).join('');
+      return '<div class="end"><h2>'+u.endH+'</h2><ul>'+lis+'</ul></div>';
+    }
+    // question
+    var q=QA()[s.qi], acc=ACC[q.tag];
+    var html='<div style="--accent:'+acc+'">';
+    html+='<div class="qhead"><span class="qnum">'+u.quest+' '+q.n+' '+u.of12+'</span><span class="tag '+q.tag+'">'+q.tagL+'</span></div>';
+    html+='<h2 class="qt">'+q.title+'</h2>';
+    q.intro.forEach(function(p){html+='<p class="intro">'+p+'</p>';});
+    html+='<div class="reso"><div class="resoh">'+u.reso+'</div>';
+    q.steps.forEach(function(st){html+='<div class="calcline frag">'+st+'</div>';});
+    html+='<div class="answer frag"><span class="pill"><span class="lbl">'+u.rep+'</span>'+q.ans+'</span>';
+    if(q.note)html+='<span class="note">'+q.note+'</span>';
+    html+='</div></div></div>';
+    return html;
+  }
+
+  var stage=document.getElementById('stage');
+  function render(){
+    stage.innerHTML=build(slides[cur]);
+    frags=Array.prototype.slice.call(stage.querySelectorAll('.frag'));
+    if(step>frags.length)step=frags.length;
+    if(step<0)step=0;
+    frags.forEach(function(f,i){f.classList.toggle('on',i<step);});
+    // bar
+    document.getElementById('progfill').style.width=(cur/LAST*100)+'%';
+    var label, u=UI[L];
+    if(slides[cur].kind==='q')label='Q'+(slides[cur].qi+1)+' — '+u.stepw+' '+step+'/'+frags.length;
+    else if(slides[cur].kind==='title')label=u.title;
+    else if(slides[cur].kind==='tools')label=u.toolbox;
+    else label=u.summary;
+    document.getElementById('counter').textContent=label;
+    document.getElementById('prev').disabled=(cur===0&&step===0);
+    document.getElementById('next').disabled=(cur===LAST&&step>=frags.length);
+  }
+  function next(){ if(step<frags.length){step++;render();} else if(cur<LAST){cur++;step=0;render();} }
+  function prev(){ if(step>0){step--;render();} else if(cur>0){cur--;step=1e9;render();} }
+
+  document.getElementById('next').addEventListener('click',function(e){e.stopPropagation();next();});
+  document.getElementById('prev').addEventListener('click',function(e){e.stopPropagation();prev();});
+  document.getElementById('stagewrap').addEventListener('click',function(e){
+    var w=this.getBoundingClientRect(); if(e.clientX-w.left < w.width*0.28) prev(); else next();
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'||e.key==='Enter'){e.preventDefault();next();}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev();}
+    else if(e.key==='Home'){cur=0;step=0;render();}
+    else if(e.key==='End'){cur=LAST;step=1e9;render();}
+  });
+
+  // theme
+  function eff(){var a=document.documentElement.getAttribute('data-theme');if(a)return a;return(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';}
+  try{var st=localStorage.getItem('supp_theme');if(st)document.documentElement.setAttribute('data-theme',st);}catch(e){}
+  document.getElementById('theme').addEventListener('click',function(e){e.stopPropagation();var n=eff()==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('supp_theme',n);}catch(e){}});
+  document.getElementById('full').addEventListener('click',function(e){e.stopPropagation();var d=document.getElementById('deck');if(!document.fullscreenElement){(d.requestFullscreen||d.webkitRequestFullscreen||function(){}).call(d);}else{document.exitFullscreen();}});
+
+  // language
+  function applyLang(){
+    document.documentElement.lang=L;
+    document.getElementById('lang').textContent=L.toUpperCase();
+    document.getElementById('full').textContent=UI[L].full;
+    render();
+  }
+  document.getElementById('lang').addEventListener('click',function(e){e.stopPropagation();L=(L==='fr'?'en':'fr');try{localStorage.setItem('supp_lang',L);}catch(e){}applyLang();});
+
+  applyLang();
+})();
+</script>
+
+</body>
+</html>

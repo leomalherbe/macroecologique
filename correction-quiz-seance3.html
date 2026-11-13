@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Correction du quiz — Séance 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Diaporama de correction en classe : diapo titre, boîte à outils, une diapo par question (numéros d'origine du quiz), synthèse. Chaque clic dévoile l'étape suivante. */
+:root{
+  --bg:#EDF1F4;--surface:#FCFDFE;--panel:#F3F7FA;
+  --ink:#14202A;--muted:#556572;--faint:#84939E;--line:#DCE4EA;--grid:#E9EEF2;
+  --econ:#2A78D6;--eco:#2E8B57;--rms:#C08A00;--warn:#C0392B;--fish:#0E7C9B;
+  --shadow:0 1px 2px rgba(20,32,42,.05),0 10px 28px rgba(20,32,42,.07);
+  --font-d:"Spectral","IBM Plex Sans",Georgia,serif;
+  --font-b:"IBM Plex Sans",system-ui,sans-serif;
+  --font-m:"IBM Plex Mono",ui-monospace,monospace;
+}
+:root:not([data-theme="light"]){@media (prefers-color-scheme:dark){
+  --bg:#0D1319;--surface:#161D24;--panel:#111820;
+  --ink:#E7EEF3;--muted:#94A3AF;--faint:#6B7A86;--line:#28323B;--grid:#222C34;
+  --econ:#3987E5;--eco:#41A76D;--rms:#D6A83A;--warn:#E0705F;--fish:#38A9C9;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.45);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0D1319;--surface:#161D24;--panel:#111820;
+  --ink:#E7EEF3;--muted:#94A3AF;--faint:#6B7A86;--line:#28323B;--grid:#222C34;
+  --econ:#3987E5;--eco:#41A76D;--rms:#D6A83A;--warn:#E0705F;--fish:#38A9C9;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.45);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;background:var(--bg)}
+body{margin:0;color:var(--ink);font-family:var(--font-b);-webkit-font-smoothing:antialiased}
+#deck{height:100vh;height:100dvh;display:flex;flex-direction:column}
+.stagewrap{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:clamp(18px,4vh,44px) clamp(16px,5vw,64px);cursor:pointer}
+.stage{width:100%;max-width:1000px;margin-block:auto}
+
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-m);font-size:clamp(11px,1.3vw,13px);font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:5px 12px;border-radius:20px;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
+.qnum{font-family:var(--font-m);font-size:clamp(12px,1.4vw,14px);color:var(--faint);font-weight:600}
+.qtype{font-family:var(--font-m);font-size:clamp(10.5px,1.2vw,12px);color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:4px 10px}
+.qhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+h2.qt{font-family:var(--font-d);font-weight:600;font-size:clamp(21px,3.1vw,30px);line-height:1.16;margin:0 0 14px;letter-spacing:-.015em;text-wrap:balance}
+.intro{font-size:clamp(15px,1.85vw,19px);line-height:1.6;color:var(--muted);margin:0 0 10px;max-width:88ch;text-wrap:pretty}
+.intro b{color:var(--ink);font-weight:600}
+.intro i{font-family:var(--font-d);font-style:italic}
+
+.reso{margin-top:18px;border-top:2px solid var(--line);padding-top:16px}
+.resoh{font-family:var(--font-m);font-size:clamp(10px,1.2vw,12px);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:10px}
+.calcline{font-family:var(--font-m);font-size:clamp(14px,1.9vw,20px);line-height:1.5;color:var(--ink);padding:6px 0 6px 20px;position:relative;overflow-wrap:break-word}
+.calcline::before{content:"";position:absolute;left:0;top:14px;width:9px;height:9px;border-radius:50%;background:var(--c);opacity:.55}
+.calcline b{color:var(--c);font-weight:600}
+.calcline .op{color:var(--faint)}
+.answer{margin-top:16px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.pill{display:inline-flex;align-items:baseline;gap:12px;flex-wrap:wrap;font-family:var(--font-m);font-size:clamp(19px,2.8vw,28px);font-weight:600;color:var(--ink);background:color-mix(in srgb,var(--c) 14%,var(--surface));border:2px solid var(--c);border-radius:12px;padding:10px 20px}
+.pill .lbl{font-family:var(--font-b);font-size:clamp(11px,1.3vw,13px);font-weight:600;color:var(--c);text-transform:uppercase;letter-spacing:.06em}
+.note{font-size:clamp(14px,1.7vw,17px);line-height:1.55;color:var(--muted);max-width:86ch;text-wrap:pretty;border-left:4px solid var(--c);background:var(--panel);border-radius:10px;padding:10px 14px}
+.note b{color:var(--ink);font-weight:600}
+.note .m{font-family:var(--font-m);color:var(--ink)}
+
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;gap:14px;align-items:flex-start;padding:12px 16px;border:1px solid var(--line);border-radius:12px;background:var(--panel);font-size:clamp(14px,1.75vw,18px);line-height:1.45;color:var(--muted)}
+.opt .k{font-family:var(--font-m);font-weight:600;color:var(--faint);flex-shrink:0;min-width:1.2em}
+.opt .mk{margin-left:auto;align-self:center;font-family:var(--font-m);font-size:clamp(10.5px,1.25vw,13px);font-weight:600;white-space:nowrap;padding-left:10px}
+.opts.shown .opt.good{border-color:var(--c);background:color-mix(in srgb,var(--c) 11%,var(--surface));color:var(--ink);box-shadow:0 0 0 1px var(--c) inset}
+.opts.shown .opt.good .k,.opts.shown .opt.good .mk{color:var(--c)}
+.opts.shown .opt.bad{opacity:.5}
+.opt .mk{visibility:hidden}
+.opts.shown .opt.good .mk{visibility:visible}
+@media (max-width:560px){.opt{flex-wrap:wrap}.opt .mk{margin-left:calc(1.2em + 14px);padding-left:0;flex-basis:100%;display:none}.opts.shown .opt.good .mk{display:block}}
+
+.frag{opacity:0;transform:translateY(8px);transition:opacity .3s ease,transform .3s ease}
+.frag.on{opacity:1;transform:none}
+
+.title-slide{text-align:center}
+.title-slide .eye{font-family:var(--font-m);font-size:clamp(12px,1.5vw,15px);letter-spacing:.16em;text-transform:uppercase;color:var(--rms);font-weight:500;margin:0 0 14px}
+.title-slide h1{font-family:var(--font-d);font-weight:600;font-size:clamp(34px,6vw,60px);line-height:1.04;margin:0;letter-spacing:-.02em;text-wrap:balance}
+
+
+.hintbar{margin-top:30px;font-family:var(--font-m);font-size:13px;color:var(--faint)}
+.hintbar kbd{font-family:var(--font-m);border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--muted)}
+
+.tools h2,.end h2{font-family:var(--font-d);font-weight:600;font-size:clamp(24px,3.6vw,34px);margin:0 0 18px;letter-spacing:-.01em}
+.toolcard{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;align-items:start;padding:16px 0;border-top:1px solid var(--line)}
+.toolcard:first-of-type{border-top:none}
+@media (max-width:640px){.toolcard{grid-template-columns:minmax(0,1fr);gap:8px}}
+.toolcard .tf{font-size:clamp(14px,1.75vw,18px);color:var(--muted);line-height:1.6;text-wrap:pretty}
+.toolcard .tf b{color:var(--ink);font-weight:600}
+.toolcard .tf .m{font-family:var(--font-m);color:var(--ink)}
+.grid4{display:grid;grid-template-columns:auto repeat(2,minmax(0,1fr));gap:6px;margin-top:6px;font-size:clamp(13px,1.6vw,16px);max-width:520px}
+.grid4 span{padding:7px 10px;border-radius:8px;text-align:center}
+.grid4 .h{font-family:var(--font-m);font-size:clamp(10.5px,1.2vw,12px);color:var(--faint);text-transform:uppercase;letter-spacing:.04em;background:none}
+.grid4 .c{background:color-mix(in srgb,var(--econ) 12%,var(--surface));color:var(--ink);font-weight:600}
+.end ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:15px}
+.end li{font-size:clamp(15px,1.95vw,20px);color:var(--muted);line-height:1.5;padding-left:30px;position:relative;text-wrap:pretty}
+.end li::before{content:"→";position:absolute;left:0;color:var(--rms);font-weight:700}
+.end li b{color:var(--ink);font-weight:600}
+.end li .m{font-family:var(--font-m);color:var(--ink)}
+
+.bar{flex-shrink:0;display:flex;align-items:center;gap:12px;padding:10px clamp(12px,4vw,40px);border-top:1px solid var(--line);background:var(--surface)}
+.bar .prog{flex:1;height:5px;border-radius:3px;background:var(--line);overflow:hidden;min-width:30px}
+.bar .prog i{display:block;height:100%;width:0;background:var(--rms);border-radius:3px;transition:width .3s}
+.nav{display:flex;gap:8px}
+.nb{font-family:var(--font-m);font-size:15px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:9px;width:40px;height:38px;cursor:pointer;display:grid;place-items:center}
+.nb:hover{color:var(--ink);border-color:var(--faint)}
+.nb:disabled{opacity:.35;cursor:default}
+.counter{font-family:var(--font-m);font-size:13px;color:var(--muted);min-width:118px;text-align:center;font-variant-numeric:tabular-nums}
+.util{display:flex;gap:8px}
+.ub{font-family:var(--font-m);font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:9px;padding:0 12px;height:38px;cursor:pointer}
+.ub:hover{color:var(--ink);border-color:var(--faint)}
+button:focus-visible{outline:2px solid var(--econ);outline-offset:2px}
+@media (max-width:640px){.counter{min-width:0;font-size:12px}#full{display:none}}
+@media (prefers-reduced-motion:reduce){.frag,.bar .prog i{transition:none}}
+</style>
+</head>
+<body>
+<div id="deck">
+  <div class="stagewrap" id="stagewrap">
+    <div class="stage" id="stage"></div>
+  </div>
+  <div class="bar">
+    <div class="nav">
+      <button class="nb" id="prev" type="button" aria-label="Précédent">‹</button>
+      <button class="nb" id="next" type="button" aria-label="Suivant">›</button>
+    </div>
+    <div class="counter" id="counter"></div>
+    <div class="prog"><i id="progfill"></i></div>
+    <div class="util">
+      <button class="ub" id="lang" type="button" aria-label="Langue / Language">FR</button>
+      <button class="ub" id="theme" type="button" aria-label="Thème clair ou sombre">◐</button>
+      <button class="ub" id="full" type="button" aria-label="Plein écran">⤢</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var P="supp3";
+var COL={biens:"var(--econ)",logiques:"var(--eco)",indices:"var(--rms)"};
+
+/* Chaque question : numéro d'origine, thème, type (calc / qcm / vf), bonnes réponses (indices), textes FR et EN.
+   Q8, Q9 et Q10 ne figurent pas dans cette correction. */
+var Q=[
+{ n:1, tag:"biens", kind:"qcm", good:[2],
+  fr:{ tagL:"Structures de marché",
+    title:"Dans laquelle de ces trois structures de marché une entreprise comme Carrefour SA opère-t-elle ?",
+    intro:["La question porte sur la position de Carrefour <b>face à ses fournisseurs</b> : agriculteurs, industriels de l'agroalimentaire, producteurs de biens de consommation."],
+    opts:["Monopole","Concurrence parfaite","Monopsone"],
+    note:"Un <b>monopsone</b> est un marché où un seul acheteur fait face à de nombreux vendeurs, et peut donc leur imposer ses prix. Carrefour n'est pas seul, mais avec quelques autres grandes centrales d'achat il concentre une part considérable des achats de la grande distribution : en toute rigueur, c'est un <b>oligopsone</b>, quelques acheteurs face à une multitude de fournisseurs. Côté clients, Carrefour n'est ni en monopole ni en concurrence parfaite." },
+  en:{ tagL:"Market structures",
+    title:"In which of these three market structures does a company such as Carrefour SA operate?",
+    intro:["The question is about Carrefour's position <b>vis-à-vis its suppliers</b>: farmers, food manufacturers, producers of consumer goods."],
+    opts:["Monopoly","Perfect competition","Monopsony"],
+    note:"A <b>monopsony</b> is a market where a single buyer faces many sellers, and can therefore impose its prices on them. Carrefour is not alone, but together with a few other large purchasing groups it concentrates a considerable share of retail purchasing: strictly speaking, it is an <b>oligopsony</b>, a few buyers facing a multitude of suppliers. On the customer side, Carrefour is neither a monopoly nor in perfect competition." } },
+
+{ n:2, tag:"biens", kind:"qcm", good:[1],
+  fr:{ tagL:"Types de biens",
+    title:"À laquelle de ces trois catégories de biens appartiennent les ressources naturelles ?",
+    intro:["Deux questions suffisent pour classer un bien : ma consommation <b>prive-t-elle</b> les autres (rivalité) ? Peut-on <b>empêcher l'accès</b> (exclusion) ?"],
+    opts:["Biens privés","Biens communs","Biens publics"],
+    note:"Un stock de poissons, une forêt, une nappe phréatique : ce que l'un prélève manque aux autres (<b>rival</b>), et il est difficile d'en interdire l'accès (<b>non exclusif</b>). Ce sont des <b>biens communs</b>, exposés à la surexploitation si aucune règle collective n'en organise l'usage." },
+  en:{ tagL:"Types of goods",
+    title:"To which of these three categories of goods do natural resources belong?",
+    intro:["Two questions are enough to classify a good: does my consumption <b>deprive</b> others (rivalry)? Can access be <b>prevented</b> (excludability)?"],
+    opts:["Private goods","Common goods","Public goods"],
+    note:"A fish stock, a forest, a groundwater table: what one person takes is lost to the others (<b>rival</b>), and access is hard to prevent (<b>non-excludable</b>). These are <b>common goods</b>, exposed to over-exploitation unless collective rules organise their use." } },
+
+{ n:3, tag:"indices", kind:"calc", ans:"D · 0,65", ansEn:"D · 0.65",
+  fr:{ tagL:"Indice de Simpson",
+    title:"Gironde : emploi réparti en cinq secteurs. Quel est l'indice de Simpson ?",
+    intro:["Parts de l'emploi salarié : agriculture 3,5 %, industrie 10 %, construction 5,7 %, services privés 47,4 %, services publics 33,4 %.",
+      "On applique <b>D = 1 − Σ p<sub>i</sub>²</b>, où p<sub>i</sub> est la part de la catégorie i. Le nombre total de salariés (594 000) ne sert pas : seules les parts comptent."],
+    steps:["Σ p² = 0,035² + 0,10² + 0,057² + 0,474² + 0,334²",
+      "Σ p² = 0,0012 + 0,0100 + 0,0032 + 0,2247 + 0,1116 = <b>0,3507</b>",
+      "D = 1 − 0,3507 = <b>0,649</b>"],
+    note:"Avec <b>S = 5</b> secteurs, D ne peut pas dépasser <span class=\"m\">1 − 1/5 = 0,80</span>. La Gironde atteint 0,65 / 0,80 = <b>81 % du maximum</b> : une diversité élevée, malgré le poids des services privés." },
+  en:{ tagL:"Simpson index",
+    title:"Gironde: employment split into five sectors. What is the Simpson index?",
+    intro:["Shares of salaried employment: agriculture 3.5%, industry 10%, construction 5.7%, private services 47.4%, public services 33.4%.",
+      "We apply <b>D = 1 − Σ p<sub>i</sub>²</b>, where p<sub>i</sub> is the share of category i. The total number of employees (594,000) is not needed: only the shares matter."],
+    steps:["Σ p² = 0.035² + 0.10² + 0.057² + 0.474² + 0.334²",
+      "Σ p² = 0.0012 + 0.0100 + 0.0032 + 0.2247 + 0.1116 = <b>0.3507</b>",
+      "D = 1 − 0.3507 = <b>0.649</b>"],
+    note:"With <b>S = 5</b> sectors, D cannot exceed <span class=\"m\">1 − 1/5 = 0.80</span>. Gironde reaches 0.65 / 0.80 = <b>81% of the maximum</b>: high diversity, despite the weight of private services." } },
+
+{ n:4, tag:"logiques", kind:"qcm", good:[0,1,2],
+  fr:{ tagL:"Secteur public",
+    title:"Le développement du secteur public dans la plupart des pays à revenu élevé résulte :",
+    intro:["Plusieurs réponses sont attendues."],
+    opts:["De la nécessité de fournir des biens publics essentiels (comme la sécurité, la santé et l'éducation)",
+      "De la nécessité de mener des politiques industrielles visant à investir dans des secteurs clés sans contrainte de rentabilité",
+      "De l'évolution, dans le temps, de ce que la société considère comme relevant du secteur public"],
+    note:"Les trois raisons se cumulent. Le secteur public fournit ce que le marché ne produit pas ou mal, investit là où la rentabilité est trop lointaine, et son périmètre suit ce que chaque société décide de garantir à tous." },
+  en:{ tagL:"Public sector",
+    title:"The expansion of the public sector in most high-income countries is due to:",
+    intro:["Several answers are expected."],
+    opts:["The need to provide essential public goods (such as security, health and education)",
+      "The need to implement industrial policies aimed at investing in key economic sectors without the constraint of profitability",
+      "Changes over time in what society considers to fall within the remit of the public sector"],
+    note:"The three reasons add up. The public sector provides what the market does not produce, or produces badly, invests where profitability is too distant, and its scope follows what each society decides to guarantee to everyone." } },
+
+{ n:5, tag:"biens", kind:"qcm", good:[1],
+  fr:{ tagL:"Bien privé",
+    title:"Lequel de ces biens est un bien PRIVÉ (rival ET exclusif) ?",
+    intro:["Un bien privé cumule les deux propriétés : ce que je consomme n'est plus disponible pour les autres, et l'on peut m'en interdire l'accès."],
+    opts:["Un phare maritime","Un repas au restaurant","Wikipédia","Une forêt exploitée en commun"],
+    note:"Le repas est <b>rival</b> (si je le mange, personne d'autre ne peut le manger) et <b>exclusif</b> (il faut payer). Le phare et Wikipédia sont des biens publics, la forêt exploitée en commun est un bien commun." },
+  en:{ tagL:"Private good",
+    title:"Which of these goods is a PRIVATE good (rival AND exclusive)?",
+    intro:["A private good combines both properties: what I consume is no longer available to others, and I can be denied access."],
+    opts:["A lighthouse","A meal at a restaurant","Wikipedia","A communally managed forest"],
+    note:"The meal is <b>rival</b> (if I eat it, nobody else can) and <b>exclusive</b> (you have to pay). The lighthouse and Wikipedia are public goods; the communally managed forest is a common good." } },
+
+{ n:6, tag:"biens", kind:"qcm", good:[0,2],
+  fr:{ tagL:"Bien public",
+    title:"Parmi ces caractéristiques, lesquelles définissent un BIEN PUBLIC ?",
+    intro:["Plusieurs réponses sont attendues."],
+    opts:["Non rival (ma consommation n'épuise pas la ressource)","Exclusif (on peut bloquer l'accès)","Non exclusif (impossible d'exclure quelqu'un)","Financé obligatoirement par l'impôt"],
+    note:"Un bien public est <b>non rival et non exclusif</b> : l'éclairage d'une rue profite à tous les passants, sans que personne puisse en être exclu. Le financement par l'impôt est fréquent, mais c'est une <b>conséquence</b>, pas une définition : comme personne ne peut être exclu, personne n'a intérêt à payer, et le marché ne le produit pas." },
+  en:{ tagL:"Public good",
+    title:"Which of these characteristics define a PUBLIC GOOD?",
+    intro:["Several answers are expected."],
+    opts:["Non-rival (my consumption does not deplete the resource)","Exclusive (access can be restricted)","Non-exclusive (it is impossible to exclude anyone)","Must be funded by taxation"],
+    note:"A public good is <b>non-rival and non-exclusive</b>: street lighting benefits every passer-by, and nobody can be excluded from it. Tax funding is common, but it is a <b>consequence</b>, not a definition: since nobody can be excluded, nobody has an interest in paying, and the market does not produce it." } },
+
+{ n:7, tag:"biens", kind:"vf", good:[1],
+  fr:{ tagL:"Bien de club",
+    title:"Netflix est un bien public, car il est accessible à de nombreux utilisateurs simultanément.",
+    intro:[],
+    opts:["Vrai","Faux"],
+    note:"Être consommé par beaucoup de monde en même temps ne suffit pas : il faut aussi savoir si l'on peut exclure. Netflix est un <b>bien de club</b> : <b>non rival</b> (un film regardé par l'un reste disponible pour les autres) mais <b>exclusif</b> (il faut s'abonner). Un bien public est non rival <b>et</b> non exclusif." },
+  en:{ tagL:"Club good",
+    title:"Netflix is a public good because it is accessible to many users simultaneously.",
+    intro:[],
+    opts:["True","False"],
+    note:"Being consumed by many people at the same time is not enough: we must also know whether exclusion is possible. Netflix is a <b>club good</b>: <b>non-rival</b> (a film watched by one person remains available to others) but <b>exclusive</b> (you need a subscription). A public good is non-rival <b>and</b> non-exclusive." } },
+
+{ n:11, tag:"logiques", kind:"qcm", good:[1],
+  fr:{ tagL:"Service public",
+    title:"La Poste distribue le courrier partout en France, y compris dans les zones non rentables. Cela illustre :",
+    intro:["Une entreprise guidée par le seul profit délaisserait les zones où la distribution coûte plus qu'elle ne rapporte."],
+    opts:["Une logique de profit privé","Un service public d'intérêt général","Un bien de club","Un marché en concurrence parfaite"],
+    note:"La Poste remplit une mission de <b>service public</b> : l'accès universel au courrier, y compris dans les zones peu denses. C'est l'intérêt général, et non la rentabilité de chaque tournée, qui fixe la mission." },
+  en:{ tagL:"Public service",
+    title:"La Poste delivers post throughout France, including in unprofitable areas. This illustrates:",
+    intro:["A firm driven by profit alone would abandon the areas where delivery costs more than it earns."],
+    opts:["A profit-driven approach","A public service in the public interest","A club good","A perfectly competitive market"],
+    note:"La Poste fulfils a <b>public service</b> mission: universal access to postal services, including in sparsely populated areas. The mission is set by the public interest, not by the profitability of each round." } },
+
+{ n:12, tag:"logiques", kind:"qcm", good:[0,1,2],
+  fr:{ tagL:"Secteur public",
+    title:"Lesquels de ces arguments justifient l'existence du SECTEUR PUBLIC ?",
+    intro:["Plusieurs réponses sont attendues."],
+    opts:["Les externalités négatives : le marché seul ne corrige pas la pollution","Les biens publics : éclairage, défense, phares, que le privé ne fournit pas","La répartition des revenus et la justice sociale","La maximisation du profit de l'État"],
+    note:"Les trois premiers arguments décrivent ce que le marché ne fait pas seul : corriger les externalités, produire les biens publics, répartir les revenus. L'État n'existe pas pour <b>maximiser son profit</b> : il agit au nom de l'intérêt général." },
+  en:{ tagL:"Public sector",
+    title:"Which of these arguments justify the existence of the PUBLIC SECTOR?",
+    intro:["Several answers are expected."],
+    opts:["Negative externalities: the market alone does not correct pollution","Public goods: street lighting, defence, lighthouses, which the private sector does not provide","Income distribution and social justice","Maximisation of the state's profit"],
+    note:"The first three arguments describe what the market does not do on its own: correct externalities, produce public goods, distribute income. The state does not exist to <b>maximise its profit</b>: it acts in the public interest." } },
+
+{ n:13, tag:"logiques", kind:"vf", good:[1],
+  fr:{ tagL:"Économie sociale et solidaire",
+    title:"L'économie sociale et solidaire (ESS) repose UNIQUEMENT sur le bénévolat et ne rémunère jamais ses salariés.",
+    intro:["Coopératives, mutuelles, associations, fondations : l'ESS regroupe des organisations très différentes."],
+    opts:["Vrai","Faux"],
+    note:"L'ESS emploie et rémunère <b>plus de deux millions de salariés</b> en France. Ce qui la distingue du secteur marchand n'est pas l'absence de salaire, mais une <b>lucrativité limitée</b> : les excédents sont réinvestis dans le projet plutôt que distribués à des actionnaires, et la gouvernance est démocratique (une personne, une voix)." },
+  en:{ tagL:"Social and solidarity economy",
+    title:"The Social and Solidarity Economy (SSE) relies SOLELY on voluntary work and never pays its employees.",
+    intro:["Co-operatives, mutual societies, associations, foundations: the SSE brings together very different organisations."],
+    opts:["True","False"],
+    note:"The SSE employs and pays <b>more than two million employees</b> in France. What sets it apart from the market sector is not the absence of wages but <b>limited profit-making</b>: surpluses are reinvested in the project rather than distributed to shareholders, and governance is democratic (one person, one vote)." } },
+
+{ n:14, tag:"biens", kind:"qcm", good:[0,2],
+  fr:{ tagL:"Biens communs",
+    title:"Lesquels de ces biens sont des biens COMMUNS (rivaux et non exclusifs) ?",
+    intro:["Plusieurs réponses sont attendues."],
+    opts:["Une forêt exploitée par plusieurs villages","Wikipédia (ressource numérique partagée)","Une rivière où l'on peut pêcher librement","L'air pur d'une région"],
+    note:"La forêt et la rivière sont <b>rivales</b> (le bois coupé, le poisson pêché manquent aux autres) et <b>non exclusives</b> (accès libre). Wikipédia et l'air pur sont non rivaux et non exclusifs : ce sont des <b>biens publics</b>." },
+  en:{ tagL:"Common goods",
+    title:"Which of these goods are COMMON GOODS (rival and non-excludable)?",
+    intro:["Several answers are expected."],
+    opts:["A forest managed by several villages","Wikipedia (a shared digital resource)","A river where people can fish freely","The clean air of a region"],
+    note:"The forest and the river are <b>rival</b> (wood cut and fish caught are lost to others) and <b>non-excludable</b> (open access). Wikipedia and clean air are non-rival and non-excludable: they are <b>public goods</b>." } },
+
+{ n:15, tag:"biens", kind:"vf", good:[0],
+  fr:{ tagL:"Changer de catégorie",
+    title:"Un bien peut changer de catégorie selon le contexte économique. Par exemple, l'eau peut être un bien public en France et un bien privé au Pérou.",
+    intro:["La catégorie d'un bien ne dépend pas seulement de sa nature : elle dépend aussi de la façon dont l'accès est organisé."],
+    opts:["Vrai","Faux"],
+    note:"Le même bien peut être géré de façons très différentes selon les pays : accès garanti à tous par une collectivité, ou accès payant auprès d'opérateurs privés. Ce sont ces <b>règles d'accès</b>, et notamment la possibilité d'exclure, qui font changer l'eau de catégorie." },
+  en:{ tagL:"Changing category",
+    title:"A good can change category depending on the economic context. For example, water can be a public good in France and a private good in Peru.",
+    intro:["A good's category does not depend only on its nature: it also depends on how access is organised."],
+    opts:["True","False"],
+    note:"The same good can be managed in very different ways from one country to another: access guaranteed to everyone by a public authority, or paid access through private operators. These <b>access rules</b>, and in particular the possibility of excluding, are what move water from one category to another." } },
+
+{ n:16, tag:"biens", kind:"qcm", good:[3],
+  fr:{ tagL:"Bien de club",
+    title:"Une salle de cinéma est un bien de CLUB parce que :",
+    intro:["Un bien de club se situe entre le bien privé et le bien public."],
+    opts:["Elle est rivale ET non exclusive","Elle est non rivale ET non exclusive","Elle est rivale ET exclusive","Elle est non rivale ET exclusive"],
+    note:"Tant que la salle n'est pas pleine, un spectateur de plus ne prive personne du film : <b>non rival</b>. Mais il faut un billet pour entrer : <b>exclusif</b>. Non rival et exclusif, c'est la définition du <b>bien de club</b>." },
+  en:{ tagL:"Club good",
+    title:"A cinema is a CLUB good because:",
+    intro:["A club good sits between a private good and a public good."],
+    opts:["It is rival AND non-exclusive","It is non-rival AND non-exclusive","It is rival AND exclusive","It is non-rival AND exclusive"],
+    note:"As long as the cinema is not full, one more viewer deprives nobody of the film: <b>non-rival</b>. But you need a ticket to get in: <b>exclusive</b>. Non-rival and exclusive is the definition of a <b>club good</b>." } },
+
+{ n:17, tag:"indices", kind:"calc", ans:"D · 0,65", ansEn:"D · 0.65",
+  fr:{ tagL:"Indice de Simpson",
+    title:"Emploi régional : 50 % marchand privé, 25 % public, 15 % ESS, 10 % autre. Quel est l'indice de Simpson ?",
+    intro:["On met chaque part au carré, on additionne, et l'on retranche le total de 1 : <b>D = 1 − Σ p<sub>i</sub>²</b>."],
+    steps:["Σ p² = 0,50² + 0,25² + 0,15² + 0,10²",
+      "Σ p² = 0,25 + 0,0625 + 0,0225 + 0,01 = <b>0,345</b>",
+      "D = 1 − 0,345 = <b>0,655</b>, soit 0,65 parmi les propositions"],
+    note:"Avec <b>S = 4</b> catégories, D ne peut pas dépasser <span class=\"m\">1 − 1/4 = 0,75</span>, pas 1. On lit donc 0,655 / 0,75 = <b>87 % du maximum</b> : une diversité élevée, et non « modérée »." },
+  en:{ tagL:"Simpson index",
+    title:"Regional employment: 50% private sector, 25% public, 15% SSE, 10% other. What is the Simpson index?",
+    intro:["Square each share, add them up, and subtract the total from 1: <b>D = 1 − Σ p<sub>i</sub>²</b>."],
+    steps:["Σ p² = 0.50² + 0.25² + 0.15² + 0.10²",
+      "Σ p² = 0.25 + 0.0625 + 0.0225 + 0.01 = <b>0.345</b>",
+      "D = 1 − 0.345 = <b>0.655</b>, i.e. 0.65 among the options"],
+    note:"With <b>S = 4</b> categories, D cannot exceed <span class=\"m\">1 − 1/4 = 0.75</span>, not 1. So we read 0.655 / 0.75 = <b>87% of the maximum</b>: high diversity, not “moderate”." } },
+
+{ n:18, tag:"indices", kind:"calc", ans:"C · 0,68", ansEn:"A · 0.68",
+  fr:{ tagL:"Indice de Simpson",
+    title:"Emploi régional : 46 % marchand privé, 24 % public, 20 % ESS, 10 % autre. Quel est l'indice de Simpson ?",
+    intro:["On met chaque part au carré, on additionne, et l'on retranche le total de 1 : <b>D = 1 − Σ p<sub>i</sub>²</b>."],
+    steps:["Σ p² = 0,46² + 0,24² + 0,20² + 0,10²",
+      "Σ p² = 0,2116 + 0,0576 + 0,04 + 0,01 = <b>0,3192</b>",
+      "D = 1 − 0,3192 = <b>0,6808</b>, arrondi à 0,68"],
+    note:"Avec <b>S = 4</b> catégories, D ne peut pas dépasser <span class=\"m\">1 − 1/4 = 0,75</span>. On lit donc 0,6808 / 0,75 = <b>91 % du maximum</b> : une diversité élevée." },
+  en:{ tagL:"Simpson index",
+    title:"Regional employment: 46% private sector, 24% public, 20% SSE, 10% other. What is the Simpson index?",
+    intro:["Square each share, add them up, and subtract the total from 1: <b>D = 1 − Σ p<sub>i</sub>²</b>."],
+    steps:["Σ p² = 0.46² + 0.24² + 0.20² + 0.10²",
+      "Σ p² = 0.2116 + 0.0576 + 0.04 + 0.01 = <b>0.3192</b>",
+      "D = 1 − 0.3192 = <b>0.6808</b>, rounded to 0.68"],
+    note:"With <b>S = 4</b> categories, D cannot exceed <span class=\"m\">1 − 1/4 = 0.75</span>. So we read 0.6808 / 0.75 = <b>91% of the maximum</b>: high diversity." } },
+
+{ n:19, tag:"logiques", kind:"qcm", good:[0,1,2],
+  fr:{ tagL:"Diversité et résilience",
+    title:"Lesquelles de ces affirmations expliquent pourquoi une économie diversifiée (3 secteurs) est plus résiliente qu'une économie purement marchande ?",
+    intro:["Plusieurs réponses sont attendues."],
+    opts:["L'adaptation : chaque secteur peut répondre à des chocs différents","L'effet portefeuille : les crises ne touchent pas les trois secteurs en même temps","La synergie : les secteurs se renforcent mutuellement","Les profits sont toujours plus élevés"],
+    note:"Ce sont les <b>trois mécanismes</b> vus en séance : adaptation, portefeuille, synergie. La diversité garantit la <b>stabilité</b>, pas des profits plus élevés : une économie résiliente peut être moins rentable à court terme." },
+  en:{ tagL:"Diversity and resilience",
+    title:"Which of these statements explain why a diversified economy (3 sectors) is more resilient than a purely market-based economy?",
+    intro:["Several answers are expected."],
+    opts:["Adaptability: each sector can respond to different shocks","The portfolio effect: crises do not affect all three sectors at the same time","Synergy: the sectors reinforce one another","Profits are always higher"],
+    note:"These are the <b>three mechanisms</b> seen in class: adaptation, portfolio, synergy. Diversity guarantees <b>stability</b>, not higher profits: a resilient economy may be less profitable in the short run." } },
+
+{ n:20, tag:"biens", kind:"qcm", good:[0,2],
+  fr:{ tagL:"Types de biens et logiques",
+    title:"Airbnb est à la location touristique ce qu'Amazon est à la distribution. Lesquelles de ces distinctions sont FAUSSES ?",
+    intro:["Attention au sens de la question : on cherche les affirmations <b>fausses</b>. Plusieurs réponses sont attendues."],
+    opts:["Airbnb = bien de club (accès payant) ; hôpital = bien public (accès selon le besoin)","Amazon = logique marchande ; La Poste = service public universel","Airbnb crée de la valeur ; La Poste produit des externalités négatives","Les deux répondent à un besoin : mobilité touristique (Airbnb) contre logement social (HLM)"],
+    note:"<b>A est fausse</b> : une nuitée Airbnb est <b>rivale</b> (un seul occupant à la fois) et exclusive, c'est un bien privé, pas un bien de club. <b>C est fausse</b> : La Poste produit des externalités <b>positives</b>, l'accès universel entretient le lien entre les territoires. B et D sont exactes." },
+  en:{ tagL:"Goods and logics",
+    title:"Airbnb is to holiday rentals what Amazon is to retail. Which of these distinctions are FALSE?",
+    intro:["Mind the direction of the question: we are looking for the <b>false</b> statements. Several answers are expected."],
+    opts:["Airbnb = club good (access by payment); hospital = public good (access based on need)","Amazon = market-based approach; La Poste = universal public service","Airbnb creates value; La Poste produces negative externalities","Both meet a need: tourist mobility (Airbnb) vs social housing (HLM)"],
+    note:"<b>A is false</b>: an Airbnb night is <b>rival</b> (one occupant at a time) and exclusive, so it is a private good, not a club good. <b>C is false</b>: La Poste produces <b>positive</b> externalities, as universal access keeps territories connected. B and D are correct." } },
+
+{ n:21, tag:"biens", kind:"vf", good:[0],
+  fr:{ tagL:"Changer de catégorie",
+    title:"Un bien privé peut devenir un bien public. Par exemple, si une entreprise pharmaceutique brevète un vaccin (bien privé), mais que le gouvernement l'achète en masse et le distribue gratuitement, il devient un bien public.",
+    intro:["Ce que l'entreprise possède, c'est le <b>brevet</b> : un droit exclusif sur la formule du vaccin, c'est-à-dire sur une connaissance."],
+    opts:["Vrai","Faux"],
+    note:"Une connaissance est <b>non rivale</b> : qu'un laboratoire utilise la formule n'empêche pas un autre de l'utiliser. C'est le brevet qui la rend <b>exclusive</b> : l'entreprise peut en interdire l'usage. Si l'État achète ce droit et le met gratuitement à la disposition de tous, l'exclusion disparaît : non rivale et non exclusive, la formule devient un <b>bien public</b>. Une règle d'accès suffit à faire changer un bien de catégorie." },
+  en:{ tagL:"Changing category",
+    title:"A private good can become a public good. For example, if a pharmaceutical company patents a vaccine (a private good), but the government buys it in bulk and distributes it free of charge, it becomes a public good.",
+    intro:["What the company owns is the <b>patent</b>: an exclusive right over the vaccine's formula, that is, over a piece of knowledge."],
+    opts:["True","False"],
+    note:"Knowledge is <b>non-rival</b>: one laboratory using the formula does not prevent another from using it. The patent is what makes it <b>exclusive</b>: the company can forbid its use. If the state buys this right and makes it freely available to all, exclusion disappears: non-rival and non-exclusive, the formula becomes a <b>public good</b>. An access rule is enough to move a good from one category to another." } },
+
+{ n:22, tag:"biens", kind:"qcm", good:[0,1,2],
+  fr:{ tagL:"Commun ou public",
+    title:"Lesquels de ces exemples illustrent correctement la distinction entre un bien COMMUN et un bien PUBLIC ?",
+    intro:["Dans chaque paire, le premier terme doit être un bien commun (rival, accès libre) et le second un bien public (non rival, accès libre). Plusieurs réponses sont attendues."],
+    opts:["Forêt communale / Parc national","Pêche en rivière libre / Éclairage urbain","Pâturage partagé / Service d'incendie","Piscine municipale gratuite / Réserve de chasse communale"],
+    note:"Dans les trois premières paires, le bien commun s'épuise si chacun prélève sans limite (bois, poissons, herbe), alors que le bien public profite à tous sans s'user. La paire D ne convient pas : la réserve de chasse, réservée aux membres de l'association, est un <b>bien de club</b>." },
+  en:{ tagL:"Common or public",
+    title:"Which of these examples correctly illustrate the distinction between a COMMON good and a PUBLIC good?",
+    intro:["In each pair, the first item should be a common good (rival, open access) and the second a public good (non-rival, open access). Several answers are expected."],
+    opts:["Communal forest vs National park","Fishing in a free-flowing river vs Street lighting","Shared grazing land vs Fire service","Free municipal swimming pool vs Communal hunting reserve"],
+    note:"In the first three pairs, the common good runs out if everyone takes without limit (wood, fish, grass), whereas the public good benefits everyone without wearing out. Pair D does not work: the hunting reserve, restricted to members of the association, is a <b>club good</b>." } },
+
+{ n:23, tag:"indices", kind:"calc", ans:"B · 1,25", ansEn:"B · 1.25",
+  fr:{ tagL:"Indice de Shannon",
+    title:"Emploi régional : 46 % marchand privé, 24 % public, 20 % ESS, 10 % autre. Quel est l'indice de Shannon ?",
+    intro:["On applique <b>H = − Σ p<sub>i</sub> ln p<sub>i</sub></b> : pour chaque catégorie, sa part multipliée par le logarithme de sa part, puis la somme, changée de signe.",
+      "On note l'indice <b>H</b>. La lettre S désigne le nombre de catégories."],
+    steps:["H = − (0,46 × ln 0,46 + 0,24 × ln 0,24 + 0,20 × ln 0,20 + 0,10 × ln 0,10)",
+      "H = − (0,46 × (−0,7765) + 0,24 × (−1,4271) + 0,20 × (−1,6094) + 0,10 × (−2,3026))",
+      "H = − (−0,3572 − 0,3425 − 0,3219 − 0,2303)",
+      "H = − (−1,2519) = <b>1,252</b>"],
+    note:"Avec <b>S = 4</b> catégories, H ne peut pas dépasser <span class=\"m\">ln 4 = 1,386</span>. La répartition atteint donc 1,252 / 1,386 = <b>90 % du maximum</b>, ce que mesure l'indice de Pielou : J = H / ln S = 0,90." },
+  en:{ tagL:"Shannon index",
+    title:"Regional employment: 46% private sector, 24% public, 20% SSE, 10% other. What is the Shannon index?",
+    intro:["We apply <b>H = − Σ p<sub>i</sub> ln p<sub>i</sub></b>: for each category, its share times the logarithm of its share, then the sum, with the sign changed.",
+      "The index is written <b>H</b>. The letter S denotes the number of categories."],
+    steps:["H = − (0.46 × ln 0.46 + 0.24 × ln 0.24 + 0.20 × ln 0.20 + 0.10 × ln 0.10)",
+      "H = − (0.46 × (−0.7765) + 0.24 × (−1.4271) + 0.20 × (−1.6094) + 0.10 × (−2.3026))",
+      "H = − (−0.3572 − 0.3425 − 0.3219 − 0.2303)",
+      "H = − (−1.2519) = <b>1.252</b>"],
+    note:"With <b>S = 4</b> categories, H cannot exceed <span class=\"m\">ln 4 = 1.386</span>. The distribution therefore reaches 1.252 / 1.386 = <b>90% of the maximum</b>, which is what Pielou's index measures: J = H / ln S = 0.90." } },
+
+{ n:24, tag:"logiques", kind:"qcm", good:[3],
+  fr:{ tagL:"Synthèse de la séance",
+    title:"D'après la séance 3, laquelle de ces propositions est la PLUS JUSTE ?",
+    intro:["Une seule réponse est attendue."],
+    opts:["Le capitalisme marchand seul peut résoudre tous les problèmes économiques","L'État seul (secteur public) est la solution optimale","L'ESS seule peut remplacer le marché et l'État","Une économie équilibrée combine marchés, secteur public et ESS, ajustés selon le contexte"],
+    note:"C'est la leçon centrale de la séance : <b>pas de solution unique</b>. Chaque logique produit les biens qu'elle sait produire, et la résilience vient de leur coexistence." },
+  en:{ tagL:"Session summary",
+    title:"Based on Session 3, which of these statements is the MOST CORRECT?",
+    intro:["Only one answer is expected."],
+    opts:["Market capitalism alone can solve all economic problems","The state alone (the public sector) is the optimal solution","The Social and Solidarity Economy (SSE) alone can replace the market and the state","A balanced economy combines markets, the public sector and the social and solidarity economy, tailored to the context"],
+    note:"This is the central lesson of the session: <b>no single solution</b>. Each logic produces the goods it is able to produce, and resilience comes from their coexistence." } }
+];
+
+var UI={
+ fr:{ eye:"Macroéconomie écologique · Séance 3", h1:"Correction du quiz",
+  hint:'<kbd>→</kbd> / <kbd>Espace</kbd> avancer &nbsp;·&nbsp; <kbd>←</kbd> revenir',
+  toolsH:"La boîte à outils",
+  tools:[
+   ["biens","Types de biens",'Deux questions : <b>rival ?</b> <b>exclusif ?</b><div class="grid4"><span class="h"></span><span class="h">Exclusif</span><span class="h">Non exclusif</span><span class="h">Rival</span><span class="c">Bien privé</span><span class="c">Bien commun</span><span class="h">Non rival</span><span class="c">Bien de club</span><span class="c">Bien public</span></div>'],
+   ["logiques","Trois logiques","Marché, secteur public, ESS. Une économie diverse résiste mieux aux chocs : <b>adaptation</b>, <b>effet portefeuille</b>, <b>synergie</b>."],
+   ["indices","Indices de diversité",'Simpson <span class="m">D = 1 − Σ p²</span>, maximum <span class="m">1 − 1/S</span><br>Shannon <span class="m">H = − Σ p ln p</span>, maximum <span class="m">ln S</span><br>Pielou <span class="m">J = H / ln S</span>, entre 0 et 1<br>p : parts de chaque catégorie · S : nombre de catégories']
+  ],
+  endH:"À retenir",
+  endLis:[
+   "Deux questions classent tous les biens : <b>rival ?</b> <b>exclusif ?</b> On obtient bien privé, bien de club, bien commun ou bien public.",
+   "La catégorie dépend aussi des <b>règles d'accès</b> : un abonnement, un brevet ou une mise à disposition gratuite peuvent faire changer un bien de case.",
+   "Marché, secteur public et ESS ne produisent pas les mêmes biens. Leur coexistence rend l'économie plus <b>résiliente</b>.",
+   "Les indices se calculent sur les <b>parts</b> p<sub>i</sub>, jamais sur les effectifs bruts.",
+   "<b>Le maximum n'est pas 1</b> : <span class=\"m\">1 − 1/S</span> pour Simpson, <span class=\"m\">ln S</span> pour Shannon. Un indice se lit en le comparant à ce maximum."
+  ],
+  reso:"Résolution", rep:"Réponse", answers:"Réponses", correct:"Bonne réponse", quest:"Question",
+  multi:"Plusieurs réponses", single:"Une réponse", vf:"Vrai ou faux", calc:"Calcul",
+  stepw:"étape", lTitle:"Titre", lTools:"Boîte à outils", lEnd:"Synthèse", full:"⤢ Plein écran", docT:"Correction du quiz — Séance 3",
+  prev:"Précédent", next:"Suivant" },
+ en:{ eye:"Ecological macroeconomics · Session 3", h1:"Quiz correction",
+  hint:'<kbd>→</kbd> / <kbd>Space</kbd> next &nbsp;·&nbsp; <kbd>←</kbd> back',
+  toolsH:"The toolbox",
+  tools:[
+   ["biens","Types of goods",'Two questions: <b>rival?</b> <b>exclusive?</b><div class="grid4"><span class="h"></span><span class="h">Exclusive</span><span class="h">Non-exclusive</span><span class="h">Rival</span><span class="c">Private good</span><span class="c">Common good</span><span class="h">Non-rival</span><span class="c">Club good</span><span class="c">Public good</span></div>'],
+   ["logiques","Three logics","Market, public sector, SSE. A diverse economy withstands shocks better: <b>adaptation</b>, <b>portfolio effect</b>, <b>synergy</b>."],
+   ["indices","Diversity indices",'Simpson <span class="m">D = 1 − Σ p²</span>, maximum <span class="m">1 − 1/S</span><br>Shannon <span class="m">H = − Σ p ln p</span>, maximum <span class="m">ln S</span><br>Pielou <span class="m">J = H / ln S</span>, between 0 and 1<br>p: share of each category · S: number of categories']
+  ],
+  endH:"Takeaways",
+  endLis:[
+   "Two questions classify every good: <b>rival?</b> <b>exclusive?</b> This gives a private good, a club good, a common good or a public good.",
+   "The category also depends on <b>access rules</b>: a subscription, a patent or free provision can move a good to another box.",
+   "Market, public sector and SSE do not produce the same goods. Their coexistence makes the economy more <b>resilient</b>.",
+   "Indices are computed on <b>shares</b> p<sub>i</sub>, never on raw counts.",
+   "<b>The maximum is not 1</b>: <span class=\"m\">1 − 1/S</span> for Simpson, <span class=\"m\">ln S</span> for Shannon. An index is read by comparing it with that maximum."
+  ],
+  reso:"Working", rep:"Answer", answers:"Answers", correct:"Correct answer", quest:"Question",
+  multi:"Several answers", single:"One answer", vf:"True or false", calc:"Calculation",
+  stepw:"step", lTitle:"Title", lTools:"Toolbox", lEnd:"Summary", full:"⤢ Full screen", docT:"Quiz correction — Session 3",
+  prev:"Previous", next:"Next" }
+};
+
+var L="fr";
+try{var sl=localStorage.getItem(P+"_lang");if(sl==="fr"||sl==="en")L=sl;}catch(e){}
+try{var st=localStorage.getItem(P+"_theme");if(st==="dark"||st==="light")document.documentElement.setAttribute("data-theme",st);}catch(e){}
+
+var slides=[{kind:"title"},{kind:"tools"}];
+Q.forEach(function(q,i){slides.push({kind:"q",qi:i});});
+slides.push({kind:"end"});
+var LAST=slides.length-1,cur=0,step=0,frags=[];
+
+function build(s){
+  var u=UI[L];
+  if(s.kind==="title"){
+    return '<div class="title-slide"><p class="eye">'+u.eye+'</p><h1>'+u.h1+'</h1><p class="hintbar">'+u.hint+'</p></div>';
+  }
+  if(s.kind==="tools"){
+    return '<div class="tools"><h2>'+u.toolsH+'</h2>'+u.tools.map(function(t){return '<div class="toolcard"><span><span class="tag" style="--c:'+COL[t[0]]+'">'+t[1]+'</span></span><div class="tf">'+t[2]+'</div></div>';}).join("")+'</div>';
+  }
+  if(s.kind==="end"){
+    return '<div class="end"><h2>'+u.endH+'</h2><ul>'+u.endLis.map(function(x){return '<li class="frag">'+x+'</li>';}).join("")+'</ul></div>';
+  }
+  var q=Q[s.qi],t=q[L],c=COL[q.tag];
+  var typ=q.kind==="calc"?u.calc:(q.kind==="vf"?u.vf:(q.good.length>1?u.multi:u.single));
+  var h='<div style="--c:'+c+'">';
+  h+='<div class="qhead"><span class="qnum">'+u.quest+' '+q.n+'</span><span class="tag" style="--c:'+c+'">'+t.tagL+'</span><span class="qtype">'+typ+'</span></div>';
+  h+='<h2 class="qt">'+t.title+'</h2>';
+  t.intro.forEach(function(p){h+='<p class="intro">'+p+'</p>';});
+  h+='<div class="reso">';
+  if(q.kind==="calc"){
+    h+='<div class="resoh">'+u.reso+'</div>';
+    t.steps.forEach(function(x){h+='<div class="calcline frag">'+x+'</div>';});
+    h+='<div class="answer frag"><span class="pill"><span class="lbl">'+u.rep+'</span>'+(L==="fr"?q.ans:q.ansEn)+'</span><div class="note">'+t.note+'</div></div>';
+  }else{
+    h+='<div class="opts" id="opts">';
+    t.opts.forEach(function(o,i){
+      var g=q.good.indexOf(i)>=0;
+      h+='<div class="opt '+(g?"good":"bad")+'"><span class="k">'+String.fromCharCode(65+i)+'</span><span>'+o+'</span><span class="mk">✓ '+u.correct+'</span></div>';
+    });
+    h+='</div><div class="frag" data-reveal="opts"></div>';
+    h+='<div class="answer frag"><div class="note">'+t.note+'</div></div>';
+  }
+  h+='</div></div>';
+  return h;
+}
+
+var stage=document.getElementById("stage");
+function render(){
+  var u=UI[L],s=slides[cur];
+  stage.innerHTML=build(s);
+  frags=Array.prototype.slice.call(stage.querySelectorAll(".frag"));
+  if(step>frags.length)step=frags.length;
+  if(step<0)step=0;
+  frags.forEach(function(f,i){f.classList.toggle("on",i<step);});
+  var rv=stage.querySelector("[data-reveal]"),op=document.getElementById("opts");
+  if(op)op.classList.toggle("shown",!!(rv&&rv.classList.contains("on")));
+  document.getElementById("progfill").style.width=(cur/LAST*100)+"%";
+  var lab;
+  if(s.kind==="q")lab="Q"+Q[s.qi].n+" · "+u.stepw+" "+step+"/"+frags.length;
+  else if(s.kind==="title")lab=u.lTitle;
+  else if(s.kind==="tools")lab=u.lTools;
+  else lab=u.lEnd;
+  document.getElementById("counter").textContent=lab;
+  document.getElementById("prev").disabled=(cur===0&&step===0);
+  document.getElementById("next").disabled=(cur===LAST&&step>=frags.length);
+}
+function top0(){document.getElementById("stagewrap").scrollTop=0;}
+function next(){if(step<frags.length){step++;render();}else if(cur<LAST){cur++;step=0;render();top0();}}
+function prev(){if(step>0){step--;render();}else if(cur>0){cur--;step=1e9;render();top0();}}
+
+document.getElementById("next").addEventListener("click",function(e){e.stopPropagation();next();});
+document.getElementById("prev").addEventListener("click",function(e){e.stopPropagation();prev();});
+document.getElementById("stagewrap").addEventListener("click",function(e){
+  var r=this.getBoundingClientRect();if(e.clientX-r.left<r.width*0.28)prev();else next();
+});
+document.addEventListener("keydown",function(e){
+  if(e.target&&e.target.tagName==="BUTTON"&&(e.key===" "||e.key==="Enter"))return;
+  if(e.key==="ArrowRight"||e.key===" "||e.key==="PageDown"){e.preventDefault();next();}
+  else if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();prev();}
+  else if(e.key==="Home"){cur=0;step=0;render();}
+  else if(e.key==="End"){cur=LAST;step=1e9;render();}
+});
+
+function eff(){var a=document.documentElement.getAttribute("data-theme");if(a)return a;return (window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";}
+document.getElementById("theme").addEventListener("click",function(e){e.stopPropagation();var n=eff()==="dark"?"light":"dark";document.documentElement.setAttribute("data-theme",n);try{localStorage.setItem(P+"_theme",n);}catch(err){}});
+document.getElementById("full").addEventListener("click",function(e){e.stopPropagation();var d=document.getElementById("deck");if(!document.fullscreenElement){var f=d.requestFullscreen||d.webkitRequestFullscreen;if(f)f.call(d);}else if(document.exitFullscreen){document.exitFullscreen();}});
+
+function applyLang(){
+  var u=UI[L];
+  document.documentElement.lang=L;
+  document.getElementById("lang").textContent=L.toUpperCase();
+  document.getElementById("full").textContent=u.full;
+  document.getElementById("prev").setAttribute("aria-label",u.prev);
+  document.getElementById("next").setAttribute("aria-label",u.next);
+  document.title=u.docT;
+  render();
+}
+document.getElementById("lang").addEventListener("click",function(e){e.stopPropagation();L=(L==="fr"?"en":"fr");try{localStorage.setItem(P+"_lang",L);}catch(err){}applyLang();});
+
+applyLang();
+})();
+</script>
+</body>
+</html>

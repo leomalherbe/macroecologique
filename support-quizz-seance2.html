@@ -1,0 +1,553 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Correction en classe — Séance 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#EDF1F4;--surface:#FCFDFE;--panel:#F1F6F9;
+    --ink:#14202A;--muted:#556572;--faint:#84939E;--line:#DBE3EA;
+    --pik:#B8860B;--rep:#4F46E5;--qcm:#2E8B57;--warn:#C0392B;
+    --shadow:0 1px 2px rgba(20,32,42,.05),0 14px 40px rgba(20,32,42,.09);
+    --font-d:"Spectral","IBM Plex Sans",Georgia,serif;--font-b:"IBM Plex Sans",system-ui,sans-serif;--font-m:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  :root:not([data-theme="light"]){@media (prefers-color-scheme:dark){
+    --bg:#0C1218;--surface:#141B22;--panel:#0F161D;
+    --ink:#E9F0F5;--muted:#9AA9B4;--faint:#6B7A86;--line:#26313A;
+    --pik:#D4A93B;--rep:#8B84F0;--qcm:#46B074;--warn:#E0705F;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 16px 44px rgba(0,0,0,.5);
+  }}
+  :root[data-theme="dark"]{
+    --bg:#0C1218;--surface:#141B22;--panel:#0F161D;
+    --ink:#E9F0F5;--muted:#9AA9B4;--faint:#6B7A86;--line:#26313A;
+    --pik:#D4A93B;--rep:#8B84F0;--qcm:#46B074;--warn:#E0705F;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 16px 44px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-b);-webkit-font-smoothing:antialiased;}
+  #deck{height:100vh;display:flex;flex-direction:column;}
+  .stagewrap{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:clamp(18px,4vh,44px) clamp(18px,5vw,64px);cursor:pointer;position:relative;}
+  .stage{width:100%;max-width:1000px;margin-block:auto;}
+
+  .tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-m);font-size:clamp(11px,1.3vw,13px);font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:5px 12px;border-radius:20px;}
+  .tag.pik{color:var(--pik);background:color-mix(in srgb,var(--pik) 15%,transparent);}
+  .tag.rep{color:var(--rep);background:color-mix(in srgb,var(--rep) 14%,transparent);}
+  .tag.qcm{color:var(--qcm);background:color-mix(in srgb,var(--qcm) 14%,transparent);}
+  .qnum{font-family:var(--font-m);font-size:clamp(12px,1.4vw,14px);color:var(--faint);font-weight:600;}
+  .qhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+  h2.qt{font-family:var(--font-d);font-weight:600;font-size:clamp(21px,3.2vw,31px);line-height:1.14;margin:0 0 16px;letter-spacing:-.015em;text-wrap:balance;}
+  .intro{font-size:clamp(15px,1.9vw,20px);line-height:1.62;color:var(--muted);margin:0 0 12px;max-width:88ch;text-wrap:pretty;}
+  .intro b{color:var(--ink);font-weight:600;} .intro i{font-family:var(--font-d);font-style:italic;}
+
+  .reso{margin-top:20px;border-top:2px solid var(--line);padding-top:16px;}
+  .resoh{font-family:var(--font-m);font-size:clamp(10px,1.2vw,12px);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:12px;}
+  .calcline{font-family:var(--font-m);font-size:clamp(14px,2vw,21px);line-height:1.5;color:var(--ink);padding:7px 0 7px 20px;position:relative;white-space:normal;overflow-wrap:break-word;}
+  .calcline::before{content:"";position:absolute;left:0;top:14px;width:9px;height:9px;border-radius:50%;background:var(--accent,var(--pik));opacity:.55;}
+  .calcline .op{color:var(--faint);}
+  .calcline b{color:var(--accent,var(--pik));font-weight:600;}
+  .answer{margin-top:16px;display:inline-flex;flex-direction:column;gap:6px;}
+  .answer .pill{display:inline-flex;align-items:center;gap:12px;font-family:var(--font-m);font-size:clamp(20px,3vw,30px);font-weight:600;color:#fff;background:var(--accent,var(--pik));border-radius:12px;padding:12px 22px;box-shadow:var(--shadow);}
+  .answer .pill .lbl{font-family:var(--font-b);font-size:clamp(11px,1.3vw,13px);font-weight:500;opacity:.85;text-transform:uppercase;letter-spacing:.06em;}
+  .answer .note{font-size:clamp(13px,1.6vw,16px);color:var(--muted);max-width:82ch;text-wrap:pretty;margin-top:2px;}
+  .answer .note b{color:var(--ink);font-weight:600;}
+
+  /* QCM */
+  .opts{margin-top:4px;display:flex;flex-direction:column;gap:10px;}
+  .opt{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--panel);font-size:clamp(14px,1.8vw,18px);line-height:1.45;color:var(--muted);transition:border-color .25s,background .25s;}
+  .opt .k{font-family:var(--font-m);font-weight:600;color:var(--faint);flex-shrink:0;}
+  .opt.good{border-color:var(--qcm);background:color-mix(in srgb,var(--qcm) 10%,var(--surface));color:var(--ink);}
+  .opt.good .k{color:var(--qcm);}
+  .opt.good .mk{margin-left:auto;align-self:center;font-family:var(--font-m);font-size:clamp(11px,1.3vw,13px);font-weight:600;color:var(--qcm);white-space:nowrap;}
+  .opt.bad{opacity:.5;}
+  .opt b{color:var(--ink);font-weight:600;}
+
+  .frag{opacity:0;transform:translateY(8px);transition:opacity .3s ease,transform .3s ease;}
+  .frag.on{opacity:1;transform:none;}
+
+  .title-slide{text-align:center;}
+  .title-slide .eye{font-family:var(--font-m);font-size:clamp(12px,1.5vw,15px);letter-spacing:.16em;text-transform:uppercase;color:var(--pik);font-weight:500;margin:0 0 14px;}
+  .title-slide h1{font-family:var(--font-d);font-weight:600;font-size:clamp(34px,6vw,60px);line-height:1.02;margin:0;letter-spacing:-.02em;text-wrap:balance;}
+  .title-slide .ts{color:var(--muted);font-size:clamp(15px,2vw,20px);margin:18px auto 0;max-width:62ch;text-wrap:pretty;}
+  .hintbar{margin-top:30px;font-family:var(--font-m);font-size:13px;color:var(--faint);}
+  .hintbar kbd{font-family:var(--font-m);border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--muted);}
+
+  .tools h2,.end h2{font-family:var(--font-d);font-weight:600;font-size:clamp(24px,3.6vw,34px);margin:0 0 22px;letter-spacing:-.01em;}
+  .toolcard{display:grid;grid-template-columns:164px 1fr;gap:18px;align-items:baseline;padding:16px 0;border-top:1px solid var(--line);}
+  .toolcard:first-of-type{border-top:none;}
+  .toolcard .tf{font-size:clamp(14px,1.8vw,18px);color:var(--muted);line-height:1.55;text-wrap:pretty;}
+  .toolcard .tf b{font-family:var(--font-m);color:var(--ink);font-weight:600;}
+  .end ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:16px;}
+  .end li{font-size:clamp(15px,2vw,20px);color:var(--muted);line-height:1.5;padding-left:30px;position:relative;text-wrap:pretty;}
+  .end li::before{content:"→";position:absolute;left:0;color:var(--pik);font-weight:700;}
+  .end li b{color:var(--ink);font-weight:600;} .end li .m{font-family:var(--font-m);color:var(--ink);}
+
+  .bar{flex-shrink:0;display:flex;align-items:center;gap:14px;padding:10px clamp(16px,4vw,40px);border-top:1px solid var(--line);background:var(--surface);}
+  .bar .prog{flex:1;height:5px;border-radius:3px;background:var(--line);overflow:hidden;}
+  .bar .prog i{display:block;height:100%;background:var(--pik);border-radius:3px;transition:width .3s;}
+  .nav{display:flex;gap:8px;}
+  .nb{font-family:var(--font-m);font-size:15px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:9px;width:40px;height:38px;cursor:pointer;display:grid;place-items:center;}
+  .nb:hover{color:var(--ink);border-color:var(--faint);}
+  .nb:disabled{opacity:.35;cursor:default;}
+  .counter{font-family:var(--font-m);font-size:13px;color:var(--muted);min-width:104px;text-align:center;font-variant-numeric:tabular-nums;}
+  .util{display:flex;gap:8px;}
+  .ub{font-family:var(--font-m);font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:9px;padding:0 12px;height:38px;cursor:pointer;}
+  .ub:hover{color:var(--ink);border-color:var(--faint);}
+  @media (max-width:640px){.counter{min-width:0;} .util{display:none;}}
+</style>
+
+<div id="deck">
+  <div class="stagewrap" id="stagewrap">
+    <div class="stage" id="stage"></div>
+  </div>
+  <div class="bar">
+    <div class="nav">
+      <button class="nb" id="prev" aria-label="Précédent">‹</button>
+      <button class="nb" id="next" aria-label="Suivant">›</button>
+    </div>
+    <div class="counter" id="counter"></div>
+    <div class="prog"><i id="progfill"></i></div>
+    <div class="util">
+      <button class="ub" id="lang" aria-label="Langue">FR</button>
+      <button class="ub" id="theme" aria-label="Thème">◐</button>
+      <button class="ub" id="full" aria-label="Plein écran">⤢ Plein écran</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ FR ============ */
+  var Q=[
+    // ---- 6 calculs ----
+    { n:1, tag:"pik", tagL:"Piketty · 2ᵉ loi β = s/g", kind:"calc",
+      title:"Épargne 10 %, croissance 1 % : quel rapport capital / revenu ?",
+      intro:[
+        "La <b>deuxième loi fondamentale</b> de Piketty donne le stock de capital accumulé à long terme : <b>β = s / g</b>, où <b>s</b> est le taux d’épargne et <b>g</b> le taux de croissance.",
+        "β s’exprime en « années de revenu » : c’est le patrimoine total rapporté au revenu national annuel."
+      ],
+      steps:[
+        "β = s / g",
+        "β = 0,10 / 0,01",
+        "β = <b>10</b>"
+      ],
+      ans:"β = 10", note:"Le patrimoine vaut <b>10 ans</b> de revenu national (soit 1000 % du PIB). Plus la croissance est faible, plus β est élevé." },
+
+    { n:2, tag:"pik", tagL:"Piketty · 1ʳᵉ loi α = r·β", kind:"calc",
+      title:"β = 10, productivité marginale du capital 4 % : quelle part du capital dans le PIB ?",
+      intro:[
+        "La <b>première loi</b> (identité comptable) donne la part du capital dans le revenu : <b>α = r · β</b>, où <b>r</b> est le rendement du capital (ici sa productivité marginale) et β le rapport capital / revenu.",
+        "β est une perspective de <b>stock</b> ; α une perspective de <b>flux</b> — la fraction du revenu annuel qui rémunère le capital."
+      ],
+      steps:[
+        "α = r × β",
+        "α = 0,04 × 10",
+        "α = <b>0,40</b>"
+      ],
+      ans:"α = 40 %", note:"40 % du PIB rémunère le capital, 60 % le travail." },
+
+    { n:3, tag:"rep", tagL:"Répartition · déciles 2 à 9", kind:"calc",
+      title:"Revenu national 3 000 Md€, 60 M de ménages : revenu moyen des déciles 2 à 9 ?",
+      intro:[
+        "Les 20 % les plus pauvres captent 5 % du revenu, les 10 % les plus riches 30 %. On cherche le revenu moyen des ménages du <b>2ᵉ au 9ᵉ décile</b> — c’est-à-dire « tout le monde sauf les extrêmes ».",
+        "Ce groupe représente <b>70 % des ménages</b> (du 20ᵉ au 90ᵉ centile) et détient ce qui reste du revenu une fois retirés les deux bouts."
+      ],
+      steps:[
+        "Part de revenu du groupe : 100 − 5 − 30 = <b>65 %</b>",
+        "Revenu du groupe : 0,65 × 3 000 Md = <b>1 950 Md€</b>",
+        "Ménages du groupe : 0,70 × 60 M = <b>42 M</b>",
+        "Revenu moyen = 1 950 Md / 42 M",
+        "= 1 950 000 M€ / 42 M = <b>46 428,6 €</b>"
+      ],
+      ans:"≈ 46 429 €", note:"On isole la « classe intermédiaire » en retirant les 20 % du bas et les 10 % du haut, en revenu <b>et</b> en population." },
+
+    { n:4, tag:"rep", tagL:"Répartition · revenu mensuel du bas", kind:"calc",
+      title:"Revenu national 2 000 Md€, 50 M d’habitants : revenu mensuel moyen des 50 % les plus pauvres ?",
+      intro:[
+        "Les 10 % les plus riches gagnent 25 % du revenu national, les <b>50 % les plus pauvres</b> seulement 8 %. On cherche le revenu <b>mensuel</b> moyen d’une personne de ce groupe du bas.",
+        "Attention aux deux pièges : le groupe du bas, c’est la moitié de la population ; et la question demande un revenu <b>mensuel</b> (÷ 12)."
+      ],
+      steps:[
+        "Revenu des 50 % du bas : 0,08 × 2 000 Md = <b>160 Md€</b>",
+        "Population du groupe : 0,50 × 50 M = <b>25 M</b>",
+        "Revenu annuel moyen = 160 Md / 25 M = <b>6 400 €</b>",
+        "Revenu mensuel = 6 400 / 12 = <b>533,3 €</b>"
+      ],
+      ans:"≈ 533 € / mois", note:"8 % du revenu pour 50 % des gens : le revenu du bas est très faible — la moyenne (3 333 €/mois) le masque." },
+
+    { n:5, tag:"pik", tagL:"Piketty · 1ʳᵉ loi α = r·β", kind:"calc",
+      title:"Capital = 8 × le revenu, rendement = 5 % : quelle part du PIB au capital ?",
+      intro:[
+        "Même loi qu’à la question 2, formulée autrement : le stock de capital vaut 8 fois le revenu national (donc <b>β = 8</b>), et sa rémunération égale sa productivité marginale, <b>r = 5 %</b>.",
+        "On applique directement α = r · β."
+      ],
+      steps:[
+        "α = r × β",
+        "α = 0,05 × 8",
+        "α = <b>0,40</b>"
+      ],
+      ans:"α = 40 %", note:"Même résultat que la Q2 (4 % × 10 = 5 % × 8) : un rendement plus faible sur un capital plus gros donne la même part." },
+
+    { n:6, tag:"rep", tagL:"Répartition · revenu d’un quartile", kind:"calc",
+      title:"Revenu national 4 000 Md€, 80 M d’habitants : revenu moyen du 3ᵉ quartile ?",
+      intro:[
+        "Les parts <b>cumulées</b> sont données : Q1 (25 %) = 3 %, Q2 (50 %) = 12 %, Q3 (75 %) = 28 %, D9 (90 %) = 58 %, P99 = 75 %. On veut le revenu moyen d’une personne du <b>3ᵉ quartile</b> (entre le 50ᵉ et le 75ᵉ centile).",
+        "Comme les parts sont cumulées, la part du 3ᵉ quartile seul = part cumulée à 75 % <b>moins</b> part cumulée à 50 %."
+      ],
+      steps:[
+        "Part du 3ᵉ quartile : 28 % − 12 % = <b>16 %</b>",
+        "Revenu du quartile : 0,16 × 4 000 Md = <b>640 Md€</b>",
+        "Population du quartile : 0,25 × 80 M = <b>20 M</b>",
+        "Revenu moyen = 640 Md / 20 M = <b>32 000 €</b>"
+      ],
+      ans:"32 000 €", note:"Piège classique des parts cumulées : on <b>soustrait</b> les bornes (28 − 12), on ne prend pas 28 % directement." },
+
+    // ---- 6 QCM ----
+    { n:7, tag:"qcm", tagL:"Lorenz · lecture de la courbe", kind:"qcm",
+      title:"Lorsque la courbe de Lorenz s’éloigne de la diagonale à 45°, cela signifie :",
+      intro:[ "La diagonale représente l’<b>égalité parfaite</b> (x % de la population = x % du revenu). Plus la courbe s’en écarte, plus l’aire de concentration (donc le Gini) est grande." ],
+      opts:[
+        "Que la croissance économique est plus élevée",
+        "Que les inégalités sont plus fortes",
+        "Que les inégalités sont plus faibles"
+      ], good:1,
+      note:"Écart maximal à la diagonale = Gini élevé = <b>forte concentration</b> des revenus." },
+
+    { n:8, tag:"qcm", tagL:"Inégalités & CO₂", kind:"qcm",
+      title:"La comparaison de la part des 10 % les plus riches dans les émissions de CO₂, en France et aux États-Unis, montre :",
+      intro:[ "Les émissions ne sont pas réparties uniformément : elles croissent fortement avec le revenu. Le constat vaut dans les deux pays, mais est encore plus marqué là où les inégalités de revenu sont fortes." ],
+      opts:[
+        "Que tous les agents économiques contribuent également aux émissions",
+        "Que les émissions de CO₂ des 10 % les plus riches sont disproportionnées, surtout aux États-Unis",
+        "Que la France émet plus de CO₂ que les États-Unis"
+      ], good:1,
+      note:"La responsabilité climatique est <b>très inégalement répartie</b> : le haut de la distribution pèse bien plus que sa part de population." },
+
+    { n:9, tag:"qcm", tagL:"PIB · trois approches", kind:"qcm",
+      title:"Le PIB peut être calculé selon trois méthodologies. Laquelle est l’approche par les revenus ?",
+      intro:[ "Le PIB est une seule grandeur mesurée de trois façons : par la <b>production</b> (somme des valeurs ajoutées), par les <b>revenus</b> (ce que la VA distribue), par la <b>dépense</b> (comment ces revenus sont dépensés)." ],
+      opts:[
+        "PIB = C + I + G",
+        "PIB = W + P + T (salaires + profits + impôts)",
+        "PIB = VA (valeur ajoutée)"
+      ], good:1,
+      note:"Revenus = <b>W + P + T</b>. C + I + G est l’approche par la dépense ; ΣVA l’approche par la production." },
+
+    { n:10, tag:"qcm", tagL:"Rawls · voile d’ignorance", kind:"qcm",
+      title:"Laquelle de ces affirmations sur le voile d’ignorance et la distribution des revenus est correcte ?",
+      intro:[ "Rawls propose une <b>méthode</b> : juger une société sans savoir quelle place on y occupera. L’esprit prudent maximise alors son pire sort possible." ],
+      opts:[
+        "Le voile d’ignorance prouve que l’égalitarisme absolu est la seule solution juste",
+        "Le voile d’ignorance propose une méthode pour définir la justice : sans connaître votre future position, vous maximisez le bien-être du plus défavorisé (critère du « maximin »)",
+        "Le voile d’ignorance affirme qu’on ne peut pas juger une distribution de revenus"
+      ], good:1,
+      note:"Ce n’est ni l’égalité parfaite, ni le renoncement à juger : c’est le <b>maximin</b> — maximiser le sort du plus mal loti." },
+
+    { n:11, tag:"qcm", tagL:"Piketty · r et g", kind:"qcm",
+      title:"Laquelle de ces affirmations décrit correctement le modèle de Piketty (2013) ?",
+      intro:[ "Le moteur du modèle est l’écart <b>r − g</b> entre le rendement du capital et la croissance. Son signe décide si le patrimoine hérité l’emporte sur le travail." ],
+      opts:[
+        "Si la croissance g dépasse le rendement du capital r, les fortunes héritées s’accumulent plus vite que les revenus du travail",
+        "Si le rendement du capital r dépasse la croissance g, l’héritage rémunère davantage que le travail, ce qui creuse les inégalités",
+        "Seule la croissance économique peut réduire les inégalités"
+      ], good:1,
+      note:"<b>r &gt; g</b> : le patrimoine croît plus vite que l’économie — il « fait boule de neige » et se concentre." },
+
+    { n:12, tag:"qcm", tagL:"Piketty · croissance zéro", kind:"qcm",
+      title:"Quelle est la différence entre une économie en croissance positive et une économie en croissance zéro selon Piketty (2013) ?",
+      intro:[ "La croissance agit comme un <b>amortisseur</b> des inégalités de patrimoine : elle dilue le poids de l’héritage. Que se passe-t-il quand elle s’annule ?" ],
+      opts:[
+        "Il n’y a pas de différence, seul le PIB total change",
+        "En croissance positive, les nouveaux revenus du travail diluent l’importance du patrimoine hérité. En croissance zéro, le patrimoine devient dominant, créant une « société d’héritiers »",
+        "Une économie en croissance zéro ne peut pas générer de revenus"
+      ], good:1,
+      note:"Croissance nulle + rendement positif = <b>société d’héritiers</b> — tout l’enjeu écologique d’un état stationnaire « juste »." }
+  ];
+
+  /* ============ EN ============ */
+  var QEN=[
+    { n:1, tag:"pik", tagL:"Piketty · 2nd law β = s/g", kind:"calc",
+      title:"Saving 10%, growth 1%: what capital / income ratio?",
+      intro:[
+        "Piketty’s <b>second fundamental law</b> gives the long-run accumulated capital stock: <b>β = s / g</b>, where <b>s</b> is the saving rate and <b>g</b> the growth rate.",
+        "β is expressed in “years of income”: total wealth relative to annual national income."
+      ],
+      steps:["β = s / g","β = 0.10 / 0.01","β = <b>10</b>"],
+      ans:"β = 10", note:"Wealth is worth <b>10 years</b> of national income (1000% of GDP). The lower the growth, the higher β." },
+
+    { n:2, tag:"pik", tagL:"Piketty · 1st law α = r·β", kind:"calc",
+      title:"β = 10, marginal product of capital 4%: what capital share of GDP?",
+      intro:[
+        "The <b>first law</b> (an accounting identity) gives capital’s share of income: <b>α = r · β</b>, where <b>r</b> is the return on capital (here its marginal product) and β the capital / income ratio.",
+        "β is a <b>stock</b> view; α a <b>flow</b> view — the fraction of annual income paid to capital."
+      ],
+      steps:["α = r × β","α = 0.04 × 10","α = <b>0.40</b>"],
+      ans:"α = 40%", note:"40% of GDP pays capital, 60% pays labour." },
+
+    { n:3, tag:"rep", tagL:"Distribution · deciles 2 to 9", kind:"calc",
+      title:"National income €3,000bn, 60M households: average income of deciles 2 to 9?",
+      intro:[
+        "The poorest 20% capture 5% of income, the richest 10% capture 30%. We want the average income of households from the <b>2nd to the 9th decile</b> — i.e. everyone but the extremes.",
+        "This group is <b>70% of households</b> (20th to 90th percentile) and holds what remains once both ends are removed."
+      ],
+      steps:[
+        "Group’s income share: 100 − 5 − 30 = <b>65%</b>",
+        "Group’s income: 0.65 × 3,000bn = <b>€1,950bn</b>",
+        "Group’s households: 0.70 × 60M = <b>42M</b>",
+        "Average income = 1,950bn / 42M",
+        "= €1,950,000M / 42M = <b>€46,428.6</b>"
+      ],
+      ans:"≈ €46,429", note:"We isolate the “middle class” by removing the bottom 20% and top 10% — in income <b>and</b> in population." },
+
+    { n:4, tag:"rep", tagL:"Distribution · bottom monthly income", kind:"calc",
+      title:"National income €2,000bn, 50M people: average monthly income of the poorest 50%?",
+      intro:[
+        "The richest 10% earn 25% of national income, the <b>poorest 50%</b> only 8%. We want the average <b>monthly</b> income of a person in that bottom group.",
+        "Two traps: the bottom group is half the population; and the question asks for a <b>monthly</b> income (÷ 12)."
+      ],
+      steps:[
+        "Income of the bottom 50%: 0.08 × 2,000bn = <b>€160bn</b>",
+        "Group population: 0.50 × 50M = <b>25M</b>",
+        "Average annual income = 160bn / 25M = <b>€6,400</b>",
+        "Monthly income = 6,400 / 12 = <b>€533.3</b>"
+      ],
+      ans:"≈ €533 / month", note:"8% of income for 50% of people: the bottom is very poor — the mean (€3,333/month) hides it." },
+
+    { n:5, tag:"pik", tagL:"Piketty · 1st law α = r·β", kind:"calc",
+      title:"Capital = 8 × income, return = 5%: what capital share of GDP?",
+      intro:[
+        "Same law as Q2, stated differently: the capital stock is 8 times national income (so <b>β = 8</b>), and its remuneration equals its marginal product, <b>r = 5%</b>.",
+        "We apply α = r · β directly."
+      ],
+      steps:["α = r × β","α = 0.05 × 8","α = <b>0.40</b>"],
+      ans:"α = 40%", note:"Same result as Q2 (4% × 10 = 5% × 8): a lower return on a larger capital gives the same share." },
+
+    { n:6, tag:"rep", tagL:"Distribution · one quartile", kind:"calc",
+      title:"National income €4,000bn, 80M people: average income of the 3rd quartile?",
+      intro:[
+        "The <b>cumulative</b> shares are given: Q1 (25%) = 3%, Q2 (50%) = 12%, Q3 (75%) = 28%, D9 (90%) = 58%, P99 = 75%. We want the average income of a person in the <b>3rd quartile</b> (50th to 75th percentile).",
+        "Since shares are cumulative, the 3rd quartile’s own share = cumulative at 75% <b>minus</b> cumulative at 50%."
+      ],
+      steps:[
+        "3rd quartile share: 28% − 12% = <b>16%</b>",
+        "Quartile income: 0.16 × 4,000bn = <b>€640bn</b>",
+        "Quartile population: 0.25 × 80M = <b>20M</b>",
+        "Average income = 640bn / 20M = <b>€32,000</b>"
+      ],
+      ans:"€32,000", note:"Classic cumulative-share trap: <b>subtract</b> the bounds (28 − 12), don’t take 28% directly." },
+
+    { n:7, tag:"qcm", tagL:"Lorenz · reading the curve", kind:"qcm",
+      title:"When the Lorenz curve moves away from the 45° diagonal, it means:",
+      intro:[ "The diagonal is <b>perfect equality</b> (x% of people = x% of income). The further the curve departs from it, the larger the concentration area (hence the Gini)." ],
+      opts:[
+        "That economic growth is higher",
+        "That inequality is greater",
+        "That inequality is lower"
+      ], good:1,
+      note:"Maximum gap to the diagonal = high Gini = <b>strong concentration</b> of income." },
+
+    { n:8, tag:"qcm", tagL:"Inequality & CO₂", kind:"qcm",
+      title:"Comparing the share of the richest 10% in CO₂ emissions, in France and the US, shows:",
+      intro:[ "Emissions aren’t spread evenly: they rise steeply with income. True in both countries, but even sharper where income inequality is high." ],
+      opts:[
+        "That all economic agents contribute equally to emissions",
+        "That CO₂ emissions of the richest 10% are disproportionate, especially in the US",
+        "That France emits more CO₂ than the US"
+      ], good:1,
+      note:"Climate responsibility is <b>very unevenly distributed</b>: the top weighs far more than its share of population." },
+
+    { n:9, tag:"qcm", tagL:"GDP · three approaches", kind:"qcm",
+      title:"GDP can be computed three ways. Which is the income approach?",
+      intro:[ "GDP is one quantity measured three ways: by <b>production</b> (sum of value added), by <b>income</b> (what VA distributes), by <b>expenditure</b> (how that income is spent)." ],
+      opts:[
+        "GDP = C + I + G",
+        "GDP = W + P + T (wages + profits + taxes)",
+        "GDP = VA (value added)"
+      ], good:1,
+      note:"Income = <b>W + P + T</b>. C + I + G is the expenditure approach; ΣVA the production approach." },
+
+    { n:10, tag:"qcm", tagL:"Rawls · veil of ignorance", kind:"qcm",
+      title:"Which statement about the veil of ignorance and income distribution is correct?",
+      intro:[ "Rawls offers a <b>method</b>: judging a society without knowing your place in it. The prudent mind then maximises its worst possible outcome." ],
+      opts:[
+        "The veil of ignorance proves absolute egalitarianism is the only just solution",
+        "The veil of ignorance offers a method to define justice: not knowing your future position, you maximise the well-being of the worst-off (the “maximin” criterion)",
+        "The veil of ignorance states that a distribution of income cannot be judged"
+      ], good:1,
+      note:"Neither perfect equality nor refusing to judge: it is the <b>maximin</b> — maximise the position of the worst-off." },
+
+    { n:11, tag:"qcm", tagL:"Piketty · r and g", kind:"qcm",
+      title:"Which statement correctly describes Piketty’s model (2013)?",
+      intro:[ "The engine of the model is the gap <b>r − g</b> between the return on capital and growth. Its sign decides whether inherited wealth beats labour." ],
+      opts:[
+        "If growth g exceeds the return on capital r, inherited fortunes accumulate faster than labour income",
+        "If the return on capital r exceeds growth g, inheritance pays more than labour, which widens inequality",
+        "Only economic growth can reduce inequality"
+      ], good:1,
+      note:"<b>r &gt; g</b>: wealth grows faster than the economy — it “snowballs” and concentrates." },
+
+    { n:12, tag:"qcm", tagL:"Piketty · zero growth", kind:"qcm",
+      title:"What is the difference between a positive-growth economy and a zero-growth one, per Piketty (2013)?",
+      intro:[ "Growth acts as a <b>buffer</b> against wealth inequality: it dilutes the weight of inheritance. What happens when it vanishes?" ],
+      opts:[
+        "There is no difference, only total GDP changes",
+        "Under positive growth, new labour income dilutes the weight of inherited wealth. Under zero growth, wealth becomes dominant, creating a “society of heirs”",
+        "A zero-growth economy cannot generate any income"
+      ], good:1,
+      note:"Zero growth + positive return = <b>society of heirs</b> — the ecological crux of a “fair” steady state." }
+  ];
+
+  var ACC={pik:"var(--pik)",rep:"var(--rep)",qcm:"var(--qcm)"};
+
+  var L='fr'; try{var sl=localStorage.getItem('supp2_lang'); if(sl==='en'||sl==='fr')L=sl;}catch(e){}
+
+  var UI={
+    fr:{ eye:"Macroéconomie écologique · Séance 2", h1:"Correction du quiz",
+      ts:"Inégalités, répartition du revenu, modèle de Piketty — 12 questions corrigées pas à pas.",
+      hint:'<kbd>→</kbd> / <kbd>Espace</kbd> avancer &nbsp;·&nbsp; <kbd>←</kbd> revenir',
+      toolsH:"Les outils de la séance", endH:"À retenir",
+      endLis:[
+        "Piketty : <span class=\"m\">β = s/g</span> (stock, en années de revenu) et <span class=\"m\">α = r·β</span> (flux, part du capital).",
+        "Parts <b>cumulées</b> : on <b>soustrait</b> les bornes pour isoler un groupe (ex. 3ᵉ quartile = 28 − 12 %).",
+        "Lire deux fois la question : revenu <b>mensuel</b> ou annuel ? par <b>personne</b> ou par ménage ?",
+        "La courbe de Lorenz s’éloigne de la diagonale ⇔ Gini élevé ⇔ fortes inégalités.",
+        "<b>r &gt; g</b> concentre le patrimoine ; en croissance nulle, l’héritage domine — « société d’héritiers »."
+      ],
+      reso:"Résolution", rep:"Réponse", correct:"Réponse correcte", quest:"Question", of12:"/ 12", stepw:"étape",
+      title:"Titre", toolbox:"Boîte à outils", summary:"Synthèse", full:"⤢ Plein écran",
+      tools:[
+        ["pik","Piketty","β = s/g &nbsp;·&nbsp; α = r·β &nbsp;·&nbsp; moteur r − g"],
+        ["rep","Répartition","part du groupe × revenu ÷ population du groupe"],
+        ["qcm","Concepts","PIB (W+P+T), Lorenz/Gini, Rawls, CO₂"]
+      ] },
+    en:{ eye:"Ecological macroeconomics · Session 2", h1:"Quiz correction",
+      ts:"Inequality, income distribution, Piketty’s model — 12 questions worked step by step.",
+      hint:'<kbd>→</kbd> / <kbd>Space</kbd> next &nbsp;·&nbsp; <kbd>←</kbd> back',
+      toolsH:"The session’s tools", endH:"Takeaways",
+      endLis:[
+        "Piketty: <span class=\"m\">β = s/g</span> (stock, in years of income) and <span class=\"m\">α = r·β</span> (flow, capital share).",
+        "<b>Cumulative</b> shares: <b>subtract</b> the bounds to isolate a group (e.g. 3rd quartile = 28 − 12%).",
+        "Read the question twice: <b>monthly</b> or annual income? per <b>person</b> or per household?",
+        "Lorenz curve moving away from the diagonal ⇔ high Gini ⇔ strong inequality.",
+        "<b>r &gt; g</b> concentrates wealth; at zero growth, inheritance dominates — a “society of heirs”."
+      ],
+      reso:"Working", rep:"Answer", correct:"Correct answer", quest:"Question", of12:"/ 12", stepw:"step",
+      title:"Title", toolbox:"Toolbox", summary:"Summary", full:"⤢ Full screen",
+      tools:[
+        ["pik","Piketty","β = s/g &nbsp;·&nbsp; α = r·β &nbsp;·&nbsp; the r − g engine"],
+        ["rep","Distribution","group share × income ÷ group population"],
+        ["qcm","Concepts","GDP (W+P+T), Lorenz/Gini, Rawls, CO₂"]
+      ] }
+  };
+
+  function QA(){ return L==='en'?QEN:Q; }
+
+  var slides=[];
+  slides.push({kind:"title"});
+  slides.push({kind:"tools"});
+  Q.forEach(function(q,idx){slides.push({kind:"q",qi:idx});});
+  slides.push({kind:"end"});
+  var LAST=slides.length-1;
+
+  var cur=0, step=0, frags=[];
+
+  function build(s){
+    var u=UI[L];
+    if(s.kind==="title"){
+      return '<div class="title-slide"><p class="eye">'+u.eye+'</p><h1>'+u.h1+'</h1><p class="ts">'+u.ts+'</p><p class="hintbar">'+u.hint+'</p></div>';
+    }
+    if(s.kind==="tools"){
+      var rows=u.tools.map(function(t){return '<div class="toolcard"><span class="tag '+t[0]+'">'+t[1]+'</span><span class="tf">'+t[2]+'</span></div>';}).join('');
+      return '<div class="tools"><h2>'+u.toolsH+'</h2>'+rows+'</div>';
+    }
+    if(s.kind==="end"){
+      var lis=u.endLis.map(function(x){return '<li class="frag">'+x+'</li>';}).join('');
+      return '<div class="end"><h2>'+u.endH+'</h2><ul>'+lis+'</ul></div>';
+    }
+    var q=QA()[s.qi], acc=ACC[q.tag];
+    var html='<div style="--accent:'+acc+'">';
+    html+='<div class="qhead"><span class="qnum">'+u.quest+' '+q.n+' '+u.of12+'</span><span class="tag '+q.tag+'">'+q.tagL+'</span></div>';
+    html+='<h2 class="qt">'+q.title+'</h2>';
+    q.intro.forEach(function(p){html+='<p class="intro">'+p+'</p>';});
+    if(q.kind==="calc"){
+      html+='<div class="reso"><div class="resoh">'+u.reso+'</div>';
+      q.steps.forEach(function(st){html+='<div class="calcline frag">'+st+'</div>';});
+      html+='<div class="answer frag"><span class="pill"><span class="lbl">'+u.rep+'</span>'+q.ans+'</span>';
+      if(q.note)html+='<span class="note">'+q.note+'</span>';
+      html+='</div></div>';
+    } else {
+      html+='<div class="reso"><div class="opts">';
+      q.opts.forEach(function(o,i){
+        var cls=(i===q.good)?'opt good frag':'opt bad frag';
+        var mk=(i===q.good)?'<span class="mk">✓ '+u.correct+'</span>':'';
+        html+='<div class="'+cls+'"><span class="k">'+String.fromCharCode(65+i)+'</span><span>'+o+'</span>'+mk+'</div>';
+      });
+      html+='</div>';
+      if(q.note)html+='<div class="answer frag"><span class="note">'+q.note+'</span></div>';
+      html+='</div>';
+    }
+    html+='</div>';
+    return html;
+  }
+
+  var stage=document.getElementById('stage');
+  function render(){
+    stage.innerHTML=build(slides[cur]);
+    frags=Array.prototype.slice.call(stage.querySelectorAll('.frag'));
+    if(step>frags.length)step=frags.length;
+    if(step<0)step=0;
+    frags.forEach(function(f,i){f.classList.toggle('on',i<step);});
+    document.getElementById('progfill').style.width=(cur/LAST*100)+'%';
+    var label, u=UI[L];
+    if(slides[cur].kind==='q')label='Q'+(slides[cur].qi+1)+' — '+u.stepw+' '+step+'/'+frags.length;
+    else if(slides[cur].kind==='title')label=u.title;
+    else if(slides[cur].kind==='tools')label=u.toolbox;
+    else label=u.summary;
+    document.getElementById('counter').textContent=label;
+    document.getElementById('prev').disabled=(cur===0&&step===0);
+    document.getElementById('next').disabled=(cur===LAST&&step>=frags.length);
+  }
+  function next(){ if(step<frags.length){step++;render();} else if(cur<LAST){cur++;step=0;render();} }
+  function prev(){ if(step>0){step--;render();} else if(cur>0){cur--;step=1e9;render();} }
+
+  document.getElementById('next').addEventListener('click',function(e){e.stopPropagation();next();});
+  document.getElementById('prev').addEventListener('click',function(e){e.stopPropagation();prev();});
+  document.getElementById('stagewrap').addEventListener('click',function(e){
+    var w=this.getBoundingClientRect(); if(e.clientX-w.left < w.width*0.28) prev(); else next();
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'||e.key==='Enter'){e.preventDefault();next();}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev();}
+    else if(e.key==='Home'){cur=0;step=0;render();}
+    else if(e.key==='End'){cur=LAST;step=1e9;render();}
+  });
+
+  function eff(){var a=document.documentElement.getAttribute('data-theme');if(a)return a;return(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';}
+  try{var st=localStorage.getItem('supp2_theme');if(st)document.documentElement.setAttribute('data-theme',st);}catch(e){}
+  document.getElementById('theme').addEventListener('click',function(e){e.stopPropagation();var n=eff()==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('supp2_theme',n);}catch(e){}});
+  document.getElementById('full').addEventListener('click',function(e){e.stopPropagation();var d=document.getElementById('deck');if(!document.fullscreenElement){(d.requestFullscreen||d.webkitRequestFullscreen||function(){}).call(d);}else{document.exitFullscreen();}});
+
+  function applyLang(){
+    document.documentElement.lang=L;
+    document.getElementById('lang').textContent=L.toUpperCase();
+    document.getElementById('full').textContent=UI[L].full;
+    document.title = L==='fr' ? "Correction en classe — Séance 2" : "In-class correction — Session 2";
+    render();
+  }
+  document.getElementById('lang').addEventListener('click',function(e){e.stopPropagation();L=(L==='fr'?'en':'fr');try{localStorage.setItem('supp2_lang',L);}catch(e){}applyLang();});
+
+  applyLang();
+})();
+</script>
+
+</body>
+</html>
+
+</body></html>
