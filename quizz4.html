@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Correction du quiz — Séance 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Diaporama de correction en classe : diapo titre, boîte à outils, une diapo par question (numéros d'origine du quiz), synthèse. Chaque clic dévoile l'étape suivante. */
+:root{
+  --bg:#EDF1F4;--surface:#FCFDFE;--panel:#F3F7FA;
+  --ink:#14202A;--muted:#556572;--faint:#84939E;--line:#DCE4EA;--grid:#E9EEF2;
+  --econ:#2A78D6;--eco:#2E8B57;--rms:#C08A00;--warn:#C0392B;--fish:#0E7C9B;
+  --shadow:0 1px 2px rgba(20,32,42,.05),0 10px 28px rgba(20,32,42,.07);
+  --font-d:"Spectral","IBM Plex Sans",Georgia,serif;
+  --font-b:"IBM Plex Sans",system-ui,sans-serif;
+  --font-m:"IBM Plex Mono",ui-monospace,monospace;
+}
+:root:not([data-theme="light"]){@media (prefers-color-scheme:dark){
+  --bg:#0D1319;--surface:#161D24;--panel:#111820;
+  --ink:#E7EEF3;--muted:#94A3AF;--faint:#6B7A86;--line:#28323B;--grid:#222C34;
+  --econ:#3987E5;--eco:#41A76D;--rms:#D6A83A;--warn:#E0705F;--fish:#38A9C9;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.45);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0D1319;--surface:#161D24;--panel:#111820;
+  --ink:#E7EEF3;--muted:#94A3AF;--faint:#6B7A86;--line:#28323B;--grid:#222C34;
+  --econ:#3987E5;--eco:#41A76D;--rms:#D6A83A;--warn:#E0705F;--fish:#38A9C9;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.45);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;background:var(--bg)}
+body{margin:0;color:var(--ink);font-family:var(--font-b);-webkit-font-smoothing:antialiased}
+#deck{height:100vh;height:100dvh;display:flex;flex-direction:column}
+.stagewrap{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:clamp(18px,4vh,44px) clamp(16px,5vw,64px);cursor:pointer}
+.stage{width:100%;max-width:1000px;margin-block:auto}
+
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-m);font-size:clamp(11px,1.3vw,13px);font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:5px 12px;border-radius:20px;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
+.qnum{font-family:var(--font-m);font-size:clamp(12px,1.4vw,14px);color:var(--faint);font-weight:600}
+.qtype{font-family:var(--font-m);font-size:clamp(10.5px,1.2vw,12px);color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:4px 10px}
+.qhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+h2.qt{font-family:var(--font-d);font-weight:600;font-size:clamp(21px,3.1vw,30px);line-height:1.16;margin:0 0 14px;letter-spacing:-.015em;text-wrap:balance}
+.intro{font-size:clamp(15px,1.85vw,19px);line-height:1.6;color:var(--muted);margin:0 0 10px;max-width:88ch;text-wrap:pretty}
+.intro b{color:var(--ink);font-weight:600}
+.intro i{font-family:var(--font-d);font-style:italic}
+
+.reso{margin-top:18px;border-top:2px solid var(--line);padding-top:16px}
+.resoh{font-family:var(--font-m);font-size:clamp(10px,1.2vw,12px);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:10px}
+.calcline{font-family:var(--font-m);font-size:clamp(14px,1.9vw,20px);line-height:1.5;color:var(--ink);padding:6px 0 6px 20px;position:relative;overflow-wrap:break-word}
+.calcline::before{content:"";position:absolute;left:0;top:14px;width:9px;height:9px;border-radius:50%;background:var(--c);opacity:.55}
+.calcline b{color:var(--c);font-weight:600}
+.calcline .op{color:var(--faint)}
+.answer{margin-top:16px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.pill{display:inline-flex;align-items:baseline;gap:12px;flex-wrap:wrap;font-family:var(--font-m);font-size:clamp(19px,2.8vw,28px);font-weight:600;color:var(--ink);background:color-mix(in srgb,var(--c) 14%,var(--surface));border:2px solid var(--c);border-radius:12px;padding:10px 20px}
+.pill .lbl{font-family:var(--font-b);font-size:clamp(11px,1.3vw,13px);font-weight:600;color:var(--c);text-transform:uppercase;letter-spacing:.06em}
+.note{font-size:clamp(14px,1.7vw,17px);line-height:1.55;color:var(--muted);max-width:86ch;text-wrap:pretty;border-left:4px solid var(--c);background:var(--panel);border-radius:10px;padding:10px 14px}
+.note b{color:var(--ink);font-weight:600}
+.note .m{font-family:var(--font-m);color:var(--ink)}
+
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;gap:14px;align-items:flex-start;padding:12px 16px;border:1px solid var(--line);border-radius:12px;background:var(--panel);font-size:clamp(14px,1.75vw,18px);line-height:1.45;color:var(--muted)}
+.opt .k{font-family:var(--font-m);font-weight:600;color:var(--faint);flex-shrink:0;min-width:1.2em}
+.opt .mk{margin-left:auto;align-self:center;font-family:var(--font-m);font-size:clamp(10.5px,1.25vw,13px);font-weight:600;white-space:nowrap;padding-left:10px}
+.opts.shown .opt.good{border-color:var(--c);background:color-mix(in srgb,var(--c) 11%,var(--surface));color:var(--ink);box-shadow:0 0 0 1px var(--c) inset}
+.opts.shown .opt.good .k,.opts.shown .opt.good .mk{color:var(--c)}
+.opts.shown .opt.bad{opacity:.5}
+.opt .mk{visibility:hidden}
+.opts.shown .opt.good .mk{visibility:visible}
+@media (max-width:560px){.opt{flex-wrap:wrap}.opt .mk{margin-left:calc(1.2em + 14px);padding-left:0;flex-basis:100%;display:none}.opts.shown .opt.good .mk{display:block}}
+
+.frag{opacity:0;transform:translateY(8px);transition:opacity .3s ease,transform .3s ease}
+.frag.on{opacity:1;transform:none}
+
+.title-slide{text-align:center}
+.title-slide .eye{font-family:var(--font-m);font-size:clamp(12px,1.5vw,15px);letter-spacing:.16em;text-transform:uppercase;color:var(--rms);font-weight:500;margin:0 0 14px}
+.title-slide h1{font-family:var(--font-d);font-weight:600;font-size:clamp(34px,6vw,60px);line-height:1.04;margin:0;letter-spacing:-.02em;text-wrap:balance}
+
+.hintbar{margin-top:30px;font-family:var(--font-m);font-size:13px;color:var(--faint)}
+.hintbar kbd{font-family:var(--font-m);border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--muted)}
+
+.tools h2,.end h2{font-family:var(--font-d);font-weight:600;font-size:clamp(24px,3.6vw,34px);margin:0 0 18px;letter-spacing:-.01em}
+.toolcard{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;align-items:start;padding:16px 0;border-top:1px solid var(--line)}
+.toolcard:first-of-type{border-top:none}
+@media (max-width:640px){.toolcard{grid-template-columns:minmax(0,1fr);gap:8px}}
+.toolcard .tf{font-size:clamp(14px,1.75vw,18px);color:var(--muted);line-height:1.6;text-wrap:pretty}
+.toolcard .tf b{color:var(--ink);font-weight:600}
+.toolcard .tf .m{font-family:var(--font-m);color:var(--ink)}
+.end ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:15px}
+.end li{font-size:clamp(15px,1.95vw,20px);color:var(--muted);line-height:1.5;padding-left:30px;position:relative;text-wrap:pretty}
+.end li::before{content:"→";position:absolute;left:0;color:var(--rms);font-weight:700}
+.end li b{color:var(--ink);font-weight:600}
+.end li .m{font-family:var(--font-m);color:var(--ink)}
+
+.bar{flex-shrink:0;display:flex;align-items:center;gap:12px;padding:10px clamp(12px,4vw,40px);border-top:1px solid var(--line);background:var(--surface)}
+.bar .prog{flex:1;height:5px;border-radius:3px;background:var(--line);overflow:hidden;min-width:30px}
+.bar .prog i{display:block;height:100%;width:0;background:var(--rms);border-radius:3px;transition:width .3s}
+.nav{display:flex;gap:8px}
+.nb{font-family:var(--font-m);font-size:15px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:9px;width:40px;height:38px;cursor:pointer;display:grid;place-items:center}
+.nb:hover{color:var(--ink);border-color:var(--faint)}
+.nb:disabled{opacity:.35;cursor:default}
+.counter{font-family:var(--font-m);font-size:13px;color:var(--muted);min-width:118px;text-align:center;font-variant-numeric:tabular-nums}
+.util{display:flex;gap:8px}
+.ub{font-family:var(--font-m);font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:9px;padding:0 12px;height:38px;cursor:pointer}
+.ub:hover{color:var(--ink);border-color:var(--faint)}
+button:focus-visible{outline:2px solid var(--econ);outline-offset:2px}
+@media (max-width:640px){.counter{min-width:0;font-size:12px}#full{display:none}}
+@media (prefers-reduced-motion:reduce){.frag,.bar .prog i{transition:none}}
+</style>
+</head>
+<body>
+<div id="deck">
+  <div class="stagewrap" id="stagewrap">
+    <div class="stage" id="stage"></div>
+  </div>
+  <div class="bar">
+    <div class="nav">
+      <button class="nb" id="prev" type="button" aria-label="Précédent">‹</button>
+      <button class="nb" id="next" type="button" aria-label="Suivant">›</button>
+    </div>
+    <div class="counter" id="counter"></div>
+    <div class="prog"><i id="progfill"></i></div>
+    <div class="util">
+      <button class="ub" id="lang" type="button" aria-label="Langue / Language">FR</button>
+      <button class="ub" id="theme" type="button" aria-label="Thème clair ou sombre">◐</button>
+      <button class="ub" id="full" type="button" aria-label="Plein écran">⤢</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var P="supp4";
+var COL={monnaie:"var(--econ)",circuit:"var(--eco)",graziani:"var(--rms)"};
+
+/* Chaque question : numéro d'origine, thème, type (calc / qcm / vf), bonnes réponses (indices), textes FR et EN. */
+var Q=[
+{ n:1, tag:"monnaie", kind:"qcm", good:[1],
+  fr:{ tagL:"Fonctions de la monnaie",
+    title:"De laquelle des trois fonctions de la monnaie découlent les deux autres ?",
+    intro:["Intermédiaire des échanges, unité de compte, réserve de valeur : l'une des trois rend les deux autres possibles."],
+    opts:["Intermédiaire des échanges","Unité de compte","Réserve de valeur"],
+    note:"La monnaie est d'abord une <b>unité de compte</b> : les prix et les dettes s'expriment dans cette unité. C'est parce qu'une dette est libellée en euros qu'on peut la régler en euros (intermédiaire des échanges) et conserver des euros pour plus tard (réserve de valeur)." },
+  en:{ tagL:"Functions of money",
+    title:"From which of the three functions of money do the other two derive?",
+    intro:["Medium of exchange, unit of account, store of value: one of the three makes the other two possible."],
+    opts:["Medium of exchange","Unit of account","Store of value"],
+    note:"Money is first a <b>unit of account</b>: prices and debts are expressed in this unit. It is because a debt is denominated in euros that it can be settled in euros (medium of exchange) and that euros can be kept for later (store of value)." } },
+
+{ n:2, tag:"monnaie", kind:"qcm", good:[2],
+  fr:{ tagL:"Monnaie endogène",
+    title:"La banque centrale accroît le volume des réserves bancaires par <i>quantitative easing</i>. En conséquence, les dépôts bancaires en circulation dans l'économie réelle :",
+    intro:["Les réserves sont la monnaie que les banques détiennent auprès de la banque centrale. Les dépôts sont la monnaie des ménages, des entreprises et de l'État."],
+    opts:["Augmentent : c'est l'effet du « multiplicateur monétaire »","Diminuent : la création monétaire génère de l'inflation et une « fuite devant la monnaie »","Restent stables : le volume des dépôts bancaires dépend de la demande de crédit des entreprises, des ménages et de l'État, ainsi que de la décision des banques commerciales de satisfaire cette demande"],
+    note:"<b>Les crédits font les dépôts.</b> Une banque ne prête pas ses réserves : elle crée des dépôts quand elle accorde un crédit. Des réserves plus abondantes ne font pas naître de crédit à elles seules : il faut une demande solvable et une banque qui accepte de la financer. Le « multiplicateur monétaire » suppose l'inverse : des réserves qui se transformeraient mécaniquement en dépôts." },
+  en:{ tagL:"Endogenous money",
+    title:"The central bank increases the volume of bank reserves through <i>quantitative easing</i>. As a result, bank deposits circulating in the real economy:",
+    intro:["Reserves are the money banks hold at the central bank. Deposits are the money of households, firms and the state."],
+    opts:["Rise: this is the “money multiplier” effect","Fall: money creation generates inflation and a “flight from money”","Remain stable: the volume of bank deposits depends on the demand for credit from firms, households and the state, and on commercial banks' decision to meet that demand"],
+    note:"<b>Loans make deposits.</b> A bank does not lend out its reserves: it creates deposits when it grants a loan. More abundant reserves do not by themselves give rise to credit: there must be creditworthy demand and a bank willing to finance it. The “money multiplier” assumes the opposite: reserves mechanically turning into deposits." } },
+
+{ n:3, tag:"circuit", kind:"qcm", good:[1],
+  fr:{ tagL:"Hiérarchie des agents",
+    title:"Selon la théorie du circuit monétaire, les agents sont hiérarchisés selon :",
+    intro:["Dans la théorie néoclassique, le consommateur est souverain. Dans le circuit, l'accès au marché dépend de l'accès à la monnaie."],
+    opts:["Leur productivité marginale","Leur distance au pôle de financement","Leur niveau de richesse nette","Leur propension à épargner"],
+    note:"Les <b>banques</b> créent la monnaie, les <b>entreprises</b> y accèdent en premier et décident de la production, les <b>ménages</b> la reçoivent en dernier. Graziani parle de « souveraineté du producteur »." },
+  en:{ tagL:"Hierarchy of agents",
+    title:"According to monetary circuit theory, agents are ranked according to:",
+    intro:["In neoclassical theory, the consumer is sovereign. In the circuit, access to the market depends on access to money."],
+    opts:["Their marginal productivity","Their distance from the financing pole","Their level of net worth","Their propensity to save"],
+    note:"<b>Banks</b> create money, <b>firms</b> access it first and decide on production, <b>households</b> receive it last. Graziani speaks of “producer sovereignty”." } },
+
+{ n:4, tag:"circuit", kind:"qcm", good:[1],
+  fr:{ tagL:"Thésaurisation",
+    title:"Toutes choses égales par ailleurs, le taux de thésaurisation des ménages double. Quelle est la conséquence à la fermeture du circuit ?",
+    intro:["La thésaurisation est la part de l'épargne que les ménages gardent en dépôts au lieu d'acheter des titres."],
+    opts:["Le profit des entreprises double","La dette résiduelle des entreprises augmente","La masse monétaire résiduelle diminue","Les entreprises émettent davantage de titres"],
+    note:"Les dépôts thésaurisés ne refluent pas vers les entreprises : elles ne peuvent pas rembourser la part correspondante de leur crédit. <b>Dette résiduelle = masse monétaire résiduelle = épargne thésaurisée</b>, qui double. Le profit ne change pas, puisqu'il dépend de i − s, et les titres émis diminuent." },
+  en:{ tagL:"Hoarding",
+    title:"All other things being equal, the households' hoarding rate doubles. What is the consequence when the circuit closes?",
+    intro:["Hoarding is the part of saving that households keep as deposits instead of buying securities."],
+    opts:["Firms' profit doubles","Firms' residual debt rises","The residual money supply falls","Firms issue more securities"],
+    note:"Hoarded deposits do not flow back to firms: they cannot repay the matching part of their loan. <b>Residual debt = residual money supply = hoarded saving</b>, which doubles. Profit does not change, since it depends on i − s, and securities issued fall." } },
+
+{ n:5, tag:"circuit", kind:"qcm", good:[1],
+  fr:{ tagL:"Finance initiale et finale",
+    title:"Laquelle de ces opérations relève de la « finance finale » ?",
+    intro:["La finance initiale ouvre le circuit. La finance finale permet aux entreprises de récupérer les dépôts qui rembourseront leur crédit."],
+    opts:["Un crédit bancaire accordé pour lancer la production","L'émission d'actions sur le marché primaire","Le versement des salaires","La création de dépôts par la banque"],
+    note:"L'émission d'actions capte une partie de l'épargne des ménages et ramène des dépôts vers les entreprises : c'est de la <b>finance finale</b>, comme les ventes de biens. Le crédit bancaire et la création de dépôts relèvent de la <b>finance initiale</b> ; les salaires sont un flux de circulation." },
+  en:{ tagL:"Initial and final finance",
+    title:"Which of these operations belongs to “final finance”?",
+    intro:["Initial finance opens the circuit. Final finance lets firms recover the deposits that will repay their loan."],
+    opts:["A bank loan granted to start production","Issuing shares on the primary market","Paying wages","The bank creating deposits"],
+    note:"Issuing shares captures part of households' saving and brings deposits back to firms: it is <b>final finance</b>, like sales of goods. Bank credit and deposit creation belong to <b>initial finance</b>; wages are a circulation flow." } },
+
+{ n:6, tag:"graziani", kind:"calc", ans:"A · 10", ansEn:"A · 10",
+  fr:{ tagL:"Titres émis",
+    title:"Crédit de 100 millions, taux d'épargne des ménages de 10 %. Quelle est la valeur des titres que les entreprises doivent émettre ?",
+    intro:["Les titres émis captent la partie de l'épargne que les ménages placent sur les marchés : <b>titres = s × (1 − h) × L</b>.","L'énoncé ne mentionne pas de thésaurisation : on suppose que toute l'épargne est placée en titres (h = 0)."],
+    steps:["Épargne des ménages = s × L = 0,10 × 100 = <b>10</b>","Thésaurisation : h = 0","Titres émis = 10 × (1 − 0) = <b>10</b>"],
+    note:"Les titres permettent aux entreprises de récupérer les dépôts que les ménages n'ont pas dépensés. Si les ménages gardaient une partie de leur épargne en dépôts, les titres émis seraient inférieurs à l'épargne." },
+  en:{ tagL:"Securities issued",
+    title:"Loan of 100 million, household saving rate of 10%. What is the value of the securities firms must issue?",
+    intro:["Securities issued capture the part of saving households place on the markets: <b>securities = s × (1 − h) × L</b>.","The question does not mention hoarding: we assume all saving is placed in securities (h = 0)."],
+    steps:["Household saving = s × L = 0.10 × 100 = <b>10</b>","Hoarding: h = 0","Securities issued = 10 × (1 − 0) = <b>10</b>"],
+    note:"Securities let firms recover the deposits households did not spend. If households kept part of their saving as deposits, securities issued would be lower than saving." } },
+
+{ n:7, tag:"graziani", kind:"calc", ans:"A · 7,5", ansEn:"A · 7.5",
+  fr:{ tagL:"Dette résiduelle",
+    title:"Crédit de 100 millions, taux d'épargne de 10 %, taux de thésaurisation de 75 %. De combien s'accroît la dette des entreprises envers les banques ?",
+    intro:["Les dépôts thésaurisés ne refluent pas vers les entreprises : <b>dette résiduelle = s × h × L</b>."],
+    steps:["Épargne = 0,10 × 100 = <b>10</b>","Dépôts thésaurisés = 0,75 × 10 = <b>7,5</b>","Remboursement possible = 100 − 7,5 = 92,5, dette résiduelle = <b>7,5</b>"],
+    note:"Les entreprises récupèrent 90 de ventes et 2,5 de titres, soit 92,5. Il leur manque exactement les <b>7,5</b> de dépôts que les ménages ont gardés." },
+  en:{ tagL:"Residual debt",
+    title:"Loan of 100 million, saving rate of 10%, hoarding rate of 75%. By how much does firms' debt to banks increase?",
+    intro:["Hoarded deposits do not flow back to firms: <b>residual debt = s × h × L</b>."],
+    steps:["Saving = 0.10 × 100 = <b>10</b>","Hoarded deposits = 0.75 × 10 = <b>7.5</b>","Possible repayment = 100 − 7.5 = 92.5, residual debt = <b>7.5</b>"],
+    note:"Firms recover 90 from sales and 2.5 from securities, that is 92.5. They are missing exactly the <b>7.5</b> of deposits households have kept." } },
+
+{ n:8, tag:"graziani", kind:"calc", ans:"B · 7,5", ansEn:"B · 7.5",
+  fr:{ tagL:"Masse monétaire finale",
+    title:"Mêmes données : crédit de 100 millions, épargne de 10 %, thésaurisation de 75 %. De combien a augmenté la masse monétaire à la fermeture du circuit ?",
+    intro:["La monnaie restante est celle qui n'a pas été détruite par un remboursement : <b>masse monétaire finale = s × h × L</b>."],
+    steps:["Monnaie créée = <b>100</b>","Monnaie détruite au remboursement = <b>92,5</b>","Masse monétaire finale = 100 − 92,5 = <b>7,5</b>"],
+    note:"C'est le même nombre qu'à la question 7, lu de l'autre côté du bilan des banques : <b>7,5 de prêts</b> non remboursés à l'actif, <b>7,5 de dépôts</b> au passif, détenus par les ménages." },
+  en:{ tagL:"Final money supply",
+    title:"Same data: loan of 100 million, saving of 10%, hoarding of 75%. By how much has the money supply risen when the circuit closes?",
+    intro:["Remaining money is the money not destroyed by a repayment: <b>final money supply = s × h × L</b>."],
+    steps:["Money created = <b>100</b>","Money destroyed on repayment = <b>92.5</b>","Final money supply = 100 − 92.5 = <b>7.5</b>"],
+    note:"This is the same number as in question 7, read from the other side of the banks' balance sheet: <b>7.5 of unrepaid loans</b> among assets, <b>7.5 of deposits</b> among liabilities, held by households." } },
+
+{ n:9, tag:"graziani", kind:"calc", ans:"E · 70", ansEn:"E · 70",
+  fr:{ tagL:"Profit macroéconomique",
+    title:"Crédit de 200 millions, 50 % de la production en biens d'équipement, épargne de 15 %, thésaurisation de 10 %. Quel est le profit macroéconomique ?",
+    intro:["Le profit est la marge réalisée sur les biens de consommation : ce que les ménages dépensent, moins ce que ces biens ont coûté. <b>Profit = (i − s) × L</b>."],
+    steps:["Biens de consommation produits (au coût) = (1 − 0,50) × 200 = <b>100</b>","Dépense des ménages = (1 − 0,15) × 200 = <b>170</b>","Profit = 170 − 100 = <b>70</b>, soit (0,50 − 0,15) × 200"],
+    note:"Le taux de thésaurisation <b>n'intervient pas</b> : il change la répartition de l'épargne entre dépôts et titres, pas la marge sur les ventes. Le profit dépend du partage de la production, décidé par les entreprises, et de l'épargne des ménages." },
+  en:{ tagL:"Macroeconomic profit",
+    title:"Loan of 200 million, 50% of output in capital goods, saving of 15%, hoarding of 10%. What is macroeconomic profit?",
+    intro:["Profit is the margin made on consumer goods: what households spend, minus what these goods cost. <b>Profit = (i − s) × L</b>."],
+    steps:["Consumer goods produced (at cost) = (1 − 0.50) × 200 = <b>100</b>","Household spending = (1 − 0.15) × 200 = <b>170</b>","Profit = 170 − 100 = <b>70</b>, i.e. (0.50 − 0.15) × 200"],
+    note:"The hoarding rate <b>plays no role</b>: it changes how saving is split between deposits and securities, not the margin on sales. Profit depends on the split of output, decided by firms, and on household saving." } },
+
+{ n:10, tag:"graziani", kind:"calc", ans:"A · 12", ansEn:"A · 12",
+  fr:{ tagL:"Masse monétaire finale",
+    title:"Crédit de 250 millions, épargne de 12 %, thésaurisation de 40 %. Quelle est la masse monétaire en circulation à la fermeture du circuit ?",
+    intro:["La monnaie restante est égale aux dépôts thésaurisés : <b>s × h × L</b>."],
+    steps:["Épargne = 0,12 × 250 = <b>30</b>","Dépôts thésaurisés = 0,40 × 30 = <b>12</b>","Masse monétaire finale = <b>12</b>"],
+    note:"Les 30 − 12 = 18 restants sont placés en titres : ils refluent vers les entreprises et servent à rembourser le crédit. Seuls les <b>12</b> gardés en dépôts survivent à la fermeture du circuit." },
+  en:{ tagL:"Final money supply",
+    title:"Loan of 250 million, saving of 12%, hoarding of 40%. What is the money supply in circulation when the circuit closes?",
+    intro:["Remaining money equals hoarded deposits: <b>s × h × L</b>."],
+    steps:["Saving = 0.12 × 250 = <b>30</b>","Hoarded deposits = 0.40 × 30 = <b>12</b>","Final money supply = <b>12</b>"],
+    note:"The remaining 30 − 12 = 18 are placed in securities: they flow back to firms and are used to repay the loan. Only the <b>12</b> kept as deposits survive the closing of the circuit." } },
+
+{ n:11, tag:"graziani", kind:"calc", ans:"D · 70", ansEn:"D · 70",
+  fr:{ tagL:"Richesse nette des ménages",
+    title:"Crédit de 100 millions, taux d'investissement de 40 %, épargne de 10 %. Quelle est la richesse nette des ménages à la fermeture du circuit ?",
+    intro:["Les ménages détiennent les biens de consommation, comptés à leur coût, et leur épargne financière, en dépôts ou en titres."],
+    steps:["Biens de consommation (au coût) = (1 − 0,40) × 100 = <b>60</b>","Épargne financière = 0,10 × 100 = <b>10</b>","Richesse nette des ménages = 60 + 10 = <b>70</b>"],
+    note:"Autre calcul : la richesse nette totale vaut 100, la valeur de la production. Les entreprises en détiennent le profit, <span class='m'>(0,40 − 0,10) × 100 = 30</span> ; il reste <b>70</b> aux ménages." },
+  en:{ tagL:"Household net worth",
+    title:"Loan of 100 million, investment rate of 40%, saving of 10%. What is households' net worth when the circuit closes?",
+    intro:["Households hold the consumer goods, valued at cost, and their financial saving, as deposits or securities."],
+    steps:["Consumer goods (at cost) = (1 − 0.40) × 100 = <b>60</b>","Financial saving = 0.10 × 100 = <b>10</b>","Household net worth = 60 + 10 = <b>70</b>"],
+    note:"Another way: total net worth is 100, the value of output. Firms hold the profit, <span class='m'>(0.40 − 0.10) × 100 = 30</span>; households keep <b>70</b>." } },
+
+{ n:12, tag:"monnaie", kind:"vf", good:[0],
+  fr:{ tagL:"Destruction monétaire",
+    title:"Lorsqu'une entreprise rembourse un crédit bancaire, de la monnaie est détruite.",
+    intro:[],
+    opts:["Vrai","Faux"],
+    note:"Le remboursement annule à la fois le <b>prêt</b> à l'actif de la banque et les <b>dépôts</b> à son passif : la monnaie créée par le crédit disparaît. La monnaie ne dure que le temps du circuit." },
+  en:{ tagL:"Money destruction",
+    title:"When a firm repays a bank loan, money is destroyed.",
+    intro:[],
+    opts:["True","False"],
+    note:"Repayment cancels both the <b>loan</b> among the bank's assets and the <b>deposits</b> among its liabilities: the money created by the loan disappears. Money lasts only as long as the circuit." } },
+
+{ n:13, tag:"circuit", kind:"vf", good:[1],
+  fr:{ tagL:"Banques et marchés",
+    title:"Selon la théorie du circuit monétaire, les marchés financiers sont indispensables pour financer la production.",
+    intro:[],
+    opts:["Vrai","Faux"],
+    note:"La production est financée par le <b>crédit bancaire</b> : c'est la finance initiale. Les marchés n'interviennent qu'ensuite, pour assurer le reflux de la monnaie quand les ménages épargnent. Leur essor traduit la hausse de l'épargne, pas un besoin de la production." },
+  en:{ tagL:"Banks and markets",
+    title:"According to monetary circuit theory, financial markets are indispensable for financing production.",
+    intro:[],
+    opts:["True","False"],
+    note:"Production is financed by <b>bank credit</b>: this is initial finance. Markets come in only afterwards, to ensure the reflux of money when households save. Their growth reflects rising saving, not a need of production." } },
+
+{ n:14, tag:"circuit", kind:"vf", good:[0],
+  fr:{ tagL:"Matrice des transactions",
+    title:"Dans une matrice des transactions, la somme des soldes financiers de l'ensemble des agents est toujours nulle.",
+    intro:[],
+    opts:["Vrai","Faux"],
+    note:"Tout flux a une origine, comptée en négatif, et une destination, comptée en positif : <b>chaque ligne somme à zéro</b>, donc les soldes aussi. L'excédent d'un agent est toujours le déficit d'un autre." },
+  en:{ tagL:"Transaction matrix",
+    title:"In a transaction matrix, the sum of the financial balances of all agents is always zero.",
+    intro:[],
+    opts:["True","False"],
+    note:"Every flow has an origin, counted as negative, and a destination, counted as positive: <b>each row sums to zero</b>, so the balances do too. One agent's surplus is always another's deficit." } },
+
+{ n:15, tag:"graziani", kind:"vf", good:[0],
+  fr:{ tagL:"Profit macroéconomique",
+    title:"Si le taux d'épargne des ménages est égal au taux d'investissement des entreprises, le profit macroéconomique des entreprises est nul.",
+    intro:[],
+    opts:["Vrai","Faux"],
+    note:"<span class='m'>Profit = (i − s) × L</span>. Si i = s, les ménages dépensent exactement le coût des biens de consommation produits : il n'y a <b>aucune marge</b>." },
+  en:{ tagL:"Macroeconomic profit",
+    title:"If the household saving rate equals firms' investment rate, firms' macroeconomic profit is zero.",
+    intro:[],
+    opts:["True","False"],
+    note:"<span class='m'>Profit = (i − s) × L</span>. If i = s, households spend exactly the cost of the consumer goods produced: there is <b>no margin</b>." } },
+
+{ n:16, tag:"graziani", kind:"vf", good:[1],
+  fr:{ tagL:"Formation des profits",
+    title:"Selon la théorie du circuit monétaire, le taux de profit macroéconomique rémunère la productivité marginale du capital.",
+    intro:[],
+    opts:["Vrai","Faux"],
+    note:"Le profit macroéconomique dépend du <b>partage de la production</b> entre biens de consommation et biens d'équipement, décidé par les entreprises, et de l'épargne des ménages. Il ne rémunère pas une productivité : c'est une conséquence de la position des entreprises dans le circuit." },
+  en:{ tagL:"Profit formation",
+    title:"According to monetary circuit theory, the macroeconomic rate of profit rewards the marginal productivity of capital.",
+    intro:[],
+    opts:["True","False"],
+    note:"Macroeconomic profit depends on the <b>split of output</b> between consumer goods and capital goods, decided by firms, and on household saving. It does not reward productivity: it follows from firms' position in the circuit." } }
+];
+
+var UI={
+ fr:{ eye:"Macroéconomie écologique · Séance 4", h1:"Correction du quiz",
+  hint:'<kbd>→</kbd> / <kbd>Espace</kbd> avancer &nbsp;·&nbsp; <kbd>←</kbd> revenir',
+  toolsH:"La boîte à outils",
+  tools:[
+   ["monnaie","Monnaie endogène","L'unité de compte vient d'abord. <b>Les crédits font les dépôts</b> : un crédit crée la monnaie, un remboursement la détruit. Les réserves de la banque centrale ne se « multiplient » pas en dépôts."],
+   ["circuit","Circuit monétaire","Hiérarchie : <b>banques → entreprises → ménages</b>, selon la distance au pôle de financement. <b>Finance initiale</b> : le crédit bancaire. <b>Finance finale</b> : ventes et titres, qui ramènent les dépôts. Dans une matrice, chaque ligne somme à zéro."],
+   ["graziani","Modèle de Graziani",'L : crédit · i : part de la production en équipements · s : taux d\'épargne · h : taux de thésaurisation<br>Épargne <span class="m">s × L</span> · Titres <span class="m">s × (1 − h) × L</span><br>Dette résiduelle = monnaie finale <span class="m">s × h × L</span><br>Profit <span class="m">(i − s) × L</span> · Richesse des ménages <span class="m">L − profit</span>']
+  ],
+  endH:"À retenir",
+  endLis:[
+   "La monnaie est <b>endogène</b> : elle naît d'un crédit et disparaît au remboursement.",
+   "Les agents sont hiérarchisés par leur <b>accès à la monnaie</b> : banques, puis entreprises, puis ménages.",
+   "Le crédit bancaire ouvre le circuit (<b>finance initiale</b>) ; les marchés n'interviennent qu'au reflux (<b>finance finale</b>).",
+   "<span class=\"m\">Profit = (i − s) × L</span> : il dépend du partage de la production décidé par les entreprises, pas de la productivité du capital.",
+   "L'épargne thésaurisée laisse une <b>dette résiduelle</b>, égale à la monnaie restante : <span class=\"m\">s × h × L</span>."
+  ],
+  reso:"Résolution", rep:"Réponse", correct:"Bonne réponse", quest:"Question",
+  multi:"Plusieurs réponses", single:"Une réponse", vf:"Vrai ou faux", calc:"Calcul",
+  stepw:"étape", lTitle:"Titre", lTools:"Boîte à outils", lEnd:"Synthèse", full:"⤢ Plein écran", docT:"Correction du quiz — Séance 4",
+  prev:"Précédent", next:"Suivant" },
+ en:{ eye:"Ecological macroeconomics · Session 4", h1:"Quiz correction",
+  hint:'<kbd>→</kbd> / <kbd>Space</kbd> next &nbsp;·&nbsp; <kbd>←</kbd> back',
+  toolsH:"The toolbox",
+  tools:[
+   ["monnaie","Endogenous money","The unit of account comes first. <b>Loans make deposits</b>: a loan creates money, a repayment destroys it. Central bank reserves do not “multiply” into deposits."],
+   ["circuit","Monetary circuit","Hierarchy: <b>banks → firms → households</b>, by distance from the financing pole. <b>Initial finance</b>: bank credit. <b>Final finance</b>: sales and securities, which bring deposits back. In a matrix, each row sums to zero."],
+   ["graziani","Graziani's model",'L: loan · i: share of output in capital goods · s: saving rate · h: hoarding rate<br>Saving <span class="m">s × L</span> · Securities <span class="m">s × (1 − h) × L</span><br>Residual debt = final money <span class="m">s × h × L</span><br>Profit <span class="m">(i − s) × L</span> · Household wealth <span class="m">L − profit</span>']
+  ],
+  endH:"Takeaways",
+  endLis:[
+   "Money is <b>endogenous</b>: it is born from a loan and disappears on repayment.",
+   "Agents are ranked by their <b>access to money</b>: banks, then firms, then households.",
+   "Bank credit opens the circuit (<b>initial finance</b>); markets come in only at the reflux (<b>final finance</b>).",
+   "<span class=\"m\">Profit = (i − s) × L</span>: it depends on the split of output decided by firms, not on the productivity of capital.",
+   "Hoarded saving leaves a <b>residual debt</b>, equal to the remaining money: <span class=\"m\">s × h × L</span>."
+  ],
+  reso:"Working", rep:"Answer", correct:"Correct answer", quest:"Question",
+  multi:"Several answers", single:"One answer", vf:"True or false", calc:"Calculation",
+  stepw:"step", lTitle:"Title", lTools:"Toolbox", lEnd:"Summary", full:"⤢ Full screen", docT:"Quiz correction — Session 4",
+  prev:"Previous", next:"Next" }
+};
+
+var L="fr";
+try{var sl=localStorage.getItem(P+"_lang");if(sl==="fr"||sl==="en")L=sl;}catch(e){}
+try{var st=localStorage.getItem(P+"_theme");if(st==="dark"||st==="light")document.documentElement.setAttribute("data-theme",st);}catch(e){}
+
+var slides=[{kind:"title"},{kind:"tools"}];
+Q.forEach(function(q,i){slides.push({kind:"q",qi:i});});
+slides.push({kind:"end"});
+var LAST=slides.length-1,cur=0,step=0,frags=[];
+
+function build(s){
+  var u=UI[L];
+  if(s.kind==="title"){
+    return '<div class="title-slide"><p class="eye">'+u.eye+'</p><h1>'+u.h1+'</h1><p class="hintbar">'+u.hint+'</p></div>';
+  }
+  if(s.kind==="tools"){
+    return '<div class="tools"><h2>'+u.toolsH+'</h2>'+u.tools.map(function(t){return '<div class="toolcard"><span><span class="tag" style="--c:'+COL[t[0]]+'">'+t[1]+'</span></span><div class="tf">'+t[2]+'</div></div>';}).join("")+'</div>';
+  }
+  if(s.kind==="end"){
+    return '<div class="end"><h2>'+u.endH+'</h2><ul>'+u.endLis.map(function(x){return '<li class="frag">'+x+'</li>';}).join("")+'</ul></div>';
+  }
+  var q=Q[s.qi],t=q[L],c=COL[q.tag];
+  var typ=q.kind==="calc"?u.calc:(q.kind==="vf"?u.vf:(q.good.length>1?u.multi:u.single));
+  var h='<div style="--c:'+c+'">';
+  h+='<div class="qhead"><span class="qnum">'+u.quest+' '+q.n+'</span><span class="tag" style="--c:'+c+'">'+t.tagL+'</span><span class="qtype">'+typ+'</span></div>';
+  h+='<h2 class="qt">'+t.title+'</h2>';
+  t.intro.forEach(function(p){h+='<p class="intro">'+p+'</p>';});
+  h+='<div class="reso">';
+  if(q.kind==="calc"){
+    h+='<div class="resoh">'+u.reso+'</div>';
+    t.steps.forEach(function(x){h+='<div class="calcline frag">'+x+'</div>';});
+    h+='<div class="answer frag"><span class="pill"><span class="lbl">'+u.rep+'</span>'+(L==="fr"?q.ans:q.ansEn)+'</span><div class="note">'+t.note+'</div></div>';
+  }else{
+    h+='<div class="opts" id="opts">';
+    t.opts.forEach(function(o,i){
+      var g=q.good.indexOf(i)>=0;
+      h+='<div class="opt '+(g?"good":"bad")+'"><span class="k">'+String.fromCharCode(65+i)+'</span><span>'+o+'</span><span class="mk">✓ '+u.correct+'</span></div>';
+    });
+    h+='</div><div class="frag" data-reveal="opts"></div>';
+    h+='<div class="answer frag"><div class="note">'+t.note+'</div></div>';
+  }
+  h+='</div></div>';
+  return h;
+}
+
+var stage=document.getElementById("stage");
+function render(){
+  var u=UI[L],s=slides[cur];
+  stage.innerHTML=build(s);
+  frags=Array.prototype.slice.call(stage.querySelectorAll(".frag"));
+  if(step>frags.length)step=frags.length;
+  if(step<0)step=0;
+  frags.forEach(function(f,i){f.classList.toggle("on",i<step);});
+  var rv=stage.querySelector("[data-reveal]"),op=document.getElementById("opts");
+  if(op)op.classList.toggle("shown",!!(rv&&rv.classList.contains("on")));
+  document.getElementById("progfill").style.width=(cur/LAST*100)+"%";
+  var lab;
+  if(s.kind==="q")lab="Q"+Q[s.qi].n+" · "+u.stepw+" "+step+"/"+frags.length;
+  else if(s.kind==="title")lab=u.lTitle;
+  else if(s.kind==="tools")lab=u.lTools;
+  else lab=u.lEnd;
+  document.getElementById("counter").textContent=lab;
+  document.getElementById("prev").disabled=(cur===0&&step===0);
+  document.getElementById("next").disabled=(cur===LAST&&step>=frags.length);
+}
+function top0(){document.getElementById("stagewrap").scrollTop=0;}
+function next(){if(step<frags.length){step++;render();}else if(cur<LAST){cur++;step=0;render();top0();}}
+function prev(){if(step>0){step--;render();}else if(cur>0){cur--;step=1e9;render();top0();}}
+
+document.getElementById("next").addEventListener("click",function(e){e.stopPropagation();next();});
+document.getElementById("prev").addEventListener("click",function(e){e.stopPropagation();prev();});
+document.getElementById("stagewrap").addEventListener("click",function(e){
+  var r=this.getBoundingClientRect();if(e.clientX-r.left<r.width*0.28)prev();else next();
+});
+document.addEventListener("keydown",function(e){
+  if(e.target&&e.target.tagName==="BUTTON"&&(e.key===" "||e.key==="Enter"))return;
+  if(e.key==="ArrowRight"||e.key===" "||e.key==="PageDown"){e.preventDefault();next();}
+  else if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();prev();}
+  else if(e.key==="Home"){cur=0;step=0;render();}
+  else if(e.key==="End"){cur=LAST;step=1e9;render();}
+});
+
+function eff(){var a=document.documentElement.getAttribute("data-theme");if(a)return a;return (window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";}
+document.getElementById("theme").addEventListener("click",function(e){e.stopPropagation();var n=eff()==="dark"?"light":"dark";document.documentElement.setAttribute("data-theme",n);try{localStorage.setItem(P+"_theme",n);}catch(err){}});
+document.getElementById("full").addEventListener("click",function(e){e.stopPropagation();var d=document.getElementById("deck");if(!document.fullscreenElement){var f=d.requestFullscreen||d.webkitRequestFullscreen;if(f)f.call(d);}else if(document.exitFullscreen){document.exitFullscreen();}});
+
+function applyLang(){
+  var u=UI[L];
+  document.documentElement.lang=L;
+  document.getElementById("lang").textContent=L.toUpperCase();
+  document.getElementById("full").textContent=u.full;
+  document.getElementById("prev").setAttribute("aria-label",u.prev);
+  document.getElementById("next").setAttribute("aria-label",u.next);
+  document.title=u.docT;
+  render();
+}
+document.getElementById("lang").addEventListener("click",function(e){e.stopPropagation();L=(L==="fr"?"en":"fr");try{localStorage.setItem(P+"_lang",L);}catch(err){}applyLang();});
+
+applyLang();
+})();
+</script>
+</body>
+</html>
